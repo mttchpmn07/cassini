@@ -1,7 +1,10 @@
 package main
 
-import "github.com/mttchpmn07/cassini/engine"
+import (
+	"github.com/mttchpmn07/cassini/engine"
+)
 
 func main() {
-	engine.Helloword()
+	app := &engine.CassiniApp{}
+	engine.Run(app)
 }
