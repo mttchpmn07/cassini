@@ -5,18 +5,6 @@ import (
 	"github.com/faiface/pixel/pixelgl"
 )
 
-var Keys = map[string]int{
-	"MouseButtonLeft":   0,
-	"MouseButtonRight":  1,
-	"MouseButtonMiddle": 2,
-	"KeyW":              87,
-	"KeyA":              65,
-	"KeyS":              83,
-	"KeyD":              68,
-	"KeyEscape":         256,
-	"KeyEnter":          257,
-}
-
 type Window interface {
 	GetWindow() *pixelgl.Window
 	UpdateKeys()
@@ -37,17 +25,17 @@ func (w *window) UpdateKeys() {
 			GlobalEvents.Broadcast(NewEvent("mouseMove", FromPixelVec(mousePos)))
 		}
 	}
-	for key, element := range Keys {
+	for key, element := range KeyMap {
 		if w.win.Pressed(pixelgl.Button(element)) {
 			GlobalEvents.Broadcast(NewEvent(key+"_Pressed", nil))
 		}
 	}
-	for key, element := range Keys {
+	for key, element := range KeyMap {
 		if w.win.JustPressed(pixelgl.Button(element)) {
 			GlobalEvents.Broadcast(NewEvent(key+"_JustPressed", nil))
 		}
 	}
-	for key, element := range Keys {
+	for key, element := range KeyMap {
 		if w.win.JustReleased(pixelgl.Button(element)) {
 			GlobalEvents.Broadcast(NewEvent(key+"_JustReleased", nil))
 		}
