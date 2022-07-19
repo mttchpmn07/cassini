@@ -31,8 +31,11 @@ func (w *window) GetWindow() *pixelgl.Window {
 }
 
 func (w *window) UpdateKeys() {
-	if w.win.MousePreviousPosition() != w.win.MousePosition() {
-		GlobalEvents.Broadcast(NewEvent("mouseMove", FromPixelVec(w.win.MousePosition())))
+	if w.win.MouseInsideWindow() {
+		mousePos := w.win.MousePosition()
+		if mousePos != w.win.MousePreviousPosition() {
+			GlobalEvents.Broadcast(NewEvent("mouseMove", FromPixelVec(mousePos)))
+		}
 	}
 	for key, element := range Keys {
 		if w.win.Pressed(pixelgl.Button(element)) {
