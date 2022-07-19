@@ -1,40 +1,40 @@
 package main
 
 import (
+	"log"
+
 	"github.com/mttchpmn07/cassini/engine"
 )
 
-/*
-func run() {
-	cfg := pixelgl.WindowConfig{
-		Title:  "Pixel Rocks!",
-		Bounds: pixel.R(0, 0, 1024, 768),
-		VSync:  true,
-	}
-	win, err := pixelgl.NewWindow(cfg)
-	if err != nil {
-		panic(err)
-	}
+type GUIOverlay struct {
+	name string
+}
 
-	win.Clear(colornames.Skyblue)
-
-	for !win.Closed() {
-		win.Update()
+func (g *GUIOverlay) OnAttach() {}
+func (g *GUIOverlay) OnDetach() {}
+func (g *GUIOverlay) OnUpdate() {}
+func (g *GUIOverlay) OnEvent(event engine.Event) {
+	if event.Key() == "mouseMove" {
+		log.Printf("<%v, %v>\n", event.Contents().(engine.Vector).X, event.Contents().(engine.Vector).Y)
+	} else {
+		log.Printf("%v pressed\n", event.Key())
 	}
 }
-*/
+func (g *GUIOverlay) Name() string {
+	return g.name
+}
 
 func main() {
-	app := engine.NewCassiniApp()
-	layer1 := engine.NewLayer("layer1")
-	layer2 := engine.NewLayer("layer2")
-	overlay1 := engine.NewLayer("overlay1")
-	overlay2 := engine.NewLayer("overlay2")
-	app.PushLayer(layer1)
-	app.PushLayer(layer2)
-	app.PushOverlay(overlay1)
-	app.PushOverlay(overlay2)
+	appConfig := engine.AppConfig{
+		Title:  "Cassini Test App",
+		Width:  1024,
+		Height: 768,
+	}
+	app := engine.NewCassiniApp(appConfig)
+	guiOverlay := &GUIOverlay{
+		name: "GUI",
+	}
+	app.PushOverlay(guiOverlay)
 
-	//pixelgl.Run(engine.Run)
 	engine.Start(app)
 }

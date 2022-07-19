@@ -22,7 +22,11 @@ func Start(app Application) {
 }
 
 func Run() {
-	win, err := createWindow("Cassini Test App", 1024, 768)
+	config := GlobalApplication.GetConfig()
+	win, err := createWindow(
+		config.Title,
+		config.Width,
+		config.Height)
 	if err != nil {
 		panic(err)
 	}
@@ -31,6 +35,7 @@ func Run() {
 	}
 
 	for !win.Closed() {
+		GlobalWindow.UpdateKeys()
 		GlobalApplication.Run()
 		win.Update()
 	}

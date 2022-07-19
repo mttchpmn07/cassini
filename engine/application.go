@@ -9,20 +9,32 @@ type Application interface {
 	OnEvent(event Event)
 	PushLayer(layer Layer)
 	PushOverlay(overlay Layer)
+	GetConfig() AppConfig
+}
+
+type AppConfig struct {
+	Title         string
+	Width, Height float64
 }
 
 type cassiniApp struct {
 	Log    LogLevel
 	Layers LayerStack
+	Config AppConfig
 }
 
-func NewCassiniApp() Application {
+func NewCassiniApp(config AppConfig) Application {
 	app := &cassiniApp{
 		Log:    Err,
 		Layers: NewLayerStack(),
+		Config: config,
 	}
 
 	return app
+}
+
+func (c *cassiniApp) GetConfig() AppConfig {
+	return c.Config
 }
 
 func (c cassiniApp) Run() {
@@ -30,11 +42,11 @@ func (c cassiniApp) Run() {
 		LogTrace("Enter: func (c CassiniApp) Run()")
 	}
 
-	Print("Hello from my cassini app!")
+	//Print("Hello from my cassini app!")
 
 	layers := c.Layers.Get()
 	for _, l := range layers {
-		fmt.Println(l.(*layer).name)
+		//fmt.Println(l.Name())
 		l.OnUpdate()
 	}
 
@@ -50,7 +62,7 @@ func (c cassiniApp) OnEvent(event Event) {
 
 	layers := c.Layers.Get()
 	for idx := len(layers) - 1; idx >= 0; idx-- {
-		fmt.Println(layers[idx].(*layer).name)
+		fmt.Println(layers[idx].Name())
 		layers[idx].OnEvent(event)
 		if event.Handled() {
 			break

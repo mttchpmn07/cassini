@@ -5,6 +5,7 @@ type Layer interface {
 	OnDetach()
 	OnUpdate()
 	OnEvent(event Event)
+	Name() string
 }
 
 type layer struct {
@@ -21,6 +22,9 @@ func (l *layer) OnAttach()           {}
 func (l *layer) OnDetach()           {}
 func (l *layer) OnUpdate()           {}
 func (l *layer) OnEvent(event Event) {}
+func (l *layer) Name() string {
+	return l.name
+}
 
 type LayerStack interface {
 	PushLayer(layer Layer)
