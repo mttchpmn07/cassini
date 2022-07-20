@@ -1,9 +1,5 @@
 package engine
 
-import (
-	"fmt"
-)
-
 type Application interface {
 	Run()
 	OnEvent(event Event)
@@ -62,7 +58,6 @@ func (c cassiniApp) OnEvent(event Event) {
 
 	layers := c.Layers.Get()
 	for idx := len(layers) - 1; idx >= 0; idx-- {
-		fmt.Println(layers[idx].Name())
 		layers[idx].OnEvent(event)
 		if event.Handled() {
 			break

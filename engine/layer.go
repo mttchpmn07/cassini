@@ -5,26 +5,22 @@ type Layer interface {
 	OnDetach()
 	OnUpdate()
 	OnEvent(event Event)
-	Name() string
 }
 
-type layer struct {
-	name string
+type DemoLayer struct {
+	Name string
 }
 
-func NewLayer(name string) Layer {
-	return &layer{
-		name: name,
+func NewDemoLayer(name string) Layer {
+	return &DemoLayer{
+		Name: name,
 	}
 }
 
-func (l *layer) OnAttach()           {}
-func (l *layer) OnDetach()           {}
-func (l *layer) OnUpdate()           {}
-func (l *layer) OnEvent(event Event) {}
-func (l *layer) Name() string {
-	return l.name
-}
+func (l *DemoLayer) OnAttach()           {}
+func (l *DemoLayer) OnDetach()           {}
+func (l *DemoLayer) OnUpdate()           {}
+func (l *DemoLayer) OnEvent(event Event) {}
 
 type LayerStack interface {
 	PushLayer(layer Layer)
@@ -90,7 +86,7 @@ func (ls *layerStack) Get() []Layer {
 
 func (ls *layerStack) PrintStack() {
 	for _, l := range ls.layers {
-		Print(l.(*layer).name)
+		Print(l.(*DemoLayer).Name)
 	}
 	Print("")
 }
