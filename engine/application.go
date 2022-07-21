@@ -37,7 +37,7 @@ func (c *cassiniApp) GetConfig() AppConfig {
 	return c.Config
 }
 
-func (c cassiniApp) Run(window interface{}, dispatcher Publisher) {
+func (c *cassiniApp) Run(window interface{}, dispatcher Publisher) {
 	if c.Log == Trace {
 		LogTrace("Enter: func (c CassiniApp) Run()")
 	}
