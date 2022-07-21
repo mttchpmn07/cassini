@@ -1,7 +1,7 @@
 package engine
 
 type Application interface {
-	Run()
+	Run(window interface{}, dispatcher Publisher)
 	OnEvent(event Event)
 	PushLayer(layer Layer)
 	PushOverlay(overlay Layer)
@@ -14,16 +14,20 @@ type AppConfig struct {
 }
 
 type cassiniApp struct {
-	Log    LogLevel
-	Layers LayerStack
-	Config AppConfig
+	Log        LogLevel
+	Layers     LayerStack
+	Config     AppConfig
+	window     interface{}
+	dispatcher Publisher
 }
 
 func NewCassiniApp(config AppConfig) Application {
 	app := &cassiniApp{
-		Log:    Err,
-		Layers: NewLayerStack(),
-		Config: config,
+		Log:        Err,
+		Layers:     NewLayerStack(),
+		Config:     config,
+		window:     nil,
+		dispatcher: nil,
 	}
 
 	return app
@@ -33,10 +37,12 @@ func (c *cassiniApp) GetConfig() AppConfig {
 	return c.Config
 }
 
-func (c cassiniApp) Run() {
+func (c cassiniApp) Run(window interface{}, dispatcher Publisher) {
 	if c.Log == Trace {
 		LogTrace("Enter: func (c CassiniApp) Run()")
 	}
+	c.window = window
+	c.dispatcher = dispatcher
 
 	//Print("Hello from my cassini app!")
 
