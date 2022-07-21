@@ -20,6 +20,10 @@ type line struct {
 	Start Vector
 	End   Vector
 }
+type Polygon *poly
+type poly struct {
+	Points []Vector
+}
 
 func NewRect(min Vector, max Vector) Rect {
 	return &pixel.Rect{
@@ -39,6 +43,14 @@ func NewLine(start Vector, end Vector) Line {
 	return &line{
 		Start: start,
 		End:   end,
+	}
+}
+
+func NewPolygon(points ...Vector) Polygon {
+	var vectors []Vector
+	vectors = append(vectors, points...)
+	return &poly{
+		Points: vectors,
 	}
 }
 
@@ -125,6 +137,10 @@ func (ren *Renderer) DrawLine(line Line) {
 	imd.Push(toPixelVec(line.End))
 	imd.Polygon(2)
 	imd.Draw(ren.platform)
+}
+
+func (ren *Renderer) DrawPoly(poly Polygon) {
+
 }
 
 // Update renders each entity to its batch and draws the batches based on the z value from CLocation
