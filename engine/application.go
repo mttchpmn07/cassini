@@ -1,7 +1,9 @@
 package engine
 
+import "github.com/faiface/pixel/pixelgl"
+
 type Application interface {
-	Run(window interface{}, dispatcher Publisher)
+	Run(platform *pixelgl.Window, dispatcher Publisher)
 	OnEvent(event Event)
 	PushLayer(layer Layer)
 	PushOverlay(overlay Layer)
@@ -17,7 +19,7 @@ type cassiniApp struct {
 	Log        LogLevel
 	Layers     LayerStack
 	Config     AppConfig
-	window     interface{}
+	platform   *pixelgl.Window
 	dispatcher Publisher
 }
 
@@ -26,7 +28,7 @@ func NewCassiniApp(config AppConfig) Application {
 		Log:        Err,
 		Layers:     NewLayerStack(),
 		Config:     config,
-		window:     nil,
+		platform:   nil,
 		dispatcher: nil,
 	}
 
@@ -37,19 +39,21 @@ func (c *cassiniApp) GetConfig() AppConfig {
 	return c.Config
 }
 
-func (c *cassiniApp) Run(window interface{}, dispatcher Publisher) {
+func (c *cassiniApp) Run(platform *pixelgl.Window, dispatcher Publisher) {
 	if c.Log == Trace {
 		LogTrace("Enter: func (c CassiniApp) Run()")
 	}
-	c.window = window
+	c.platform = platform
 	c.dispatcher = dispatcher
 
 	//Print("Hello from my cassini app!")
-
-	layers := c.Layers.Get()
-	for _, l := range layers {
-		//fmt.Println(l.Name())
-		l.OnUpdate()
+	for !c.platform.Closed() {
+		layers := c.Layers.Get()
+		for _, l := range layers {
+			//fmt.Println(l.Name())
+			l.OnUpdate()
+		}
+		c.platform.Update()
 	}
 
 	if c.Log == Trace {

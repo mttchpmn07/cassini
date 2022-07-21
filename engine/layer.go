@@ -17,10 +17,12 @@ func NewDemoLayer(name string) Layer {
 	}
 }
 
-func (l *DemoLayer) OnAttach()           {}
-func (l *DemoLayer) OnDetach()           {}
-func (l *DemoLayer) OnUpdate()           {}
-func (l *DemoLayer) OnEvent(event Event) {}
+func (l *DemoLayer) OnAttach() {}
+func (l *DemoLayer) OnDetach() {}
+func (l *DemoLayer) OnUpdate() {}
+func (l *DemoLayer) OnEvent(event Event) {
+	Log(event.Key())
+}
 
 type LayerStack interface {
 	PushLayer(layer Layer)
