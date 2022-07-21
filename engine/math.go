@@ -1,14 +1,22 @@
 package engine
 
+import (
+	"fmt"
+
+	"github.com/faiface/pixel"
+)
+
 type Vector struct {
 	X, Y float64
 }
 
-/*
-func FromPixelVec(vec pixel.Vec) Vector {
-	return Vector{
+func fromPixelVec(vec pixel.Vec) *Vector {
+	return &Vector{
 		X: vec.X,
 		Y: vec.Y,
 	}
 }
-*/
+
+func (v *Vector) String() string {
+	return fmt.Sprintf("<%v, %v>", v.X, v.Y)
+}

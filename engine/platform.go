@@ -5,7 +5,11 @@ import (
 	"github.com/faiface/pixel/pixelgl"
 )
 
-func NewPlatform(title string, width float64, height float64) (*pixelgl.Window, error) {
+type Platform struct {
+	*pixelgl.Window
+}
+
+func NewPlatform(title string, width float64, height float64) (*Platform, error) {
 	cfg := pixelgl.WindowConfig{
 		Title:  title,
 		Bounds: pixel.R(0, 0, width, height),
@@ -14,5 +18,35 @@ func NewPlatform(title string, width float64, height float64) (*pixelgl.Window, 
 	if err != nil {
 		return nil, err
 	}
-	return win, nil
+	return &Platform{win}, nil
+}
+
+func (p *Platform) UpdateWindow(dispatcher Publisher) {
+	p.Update()
+	p.updateKeys(dispatcher)
+
+}
+
+func (p *Platform) updateKeys(dispatcher Publisher) {
+	if p.MouseInsideWindow() {
+		mousePos := p.MousePosition()
+		if mousePos != p.MousePreviousPosition() {
+			dispatcher.Broadcast(NewEvent("mouseMove", fromPixelVec(mousePos)))
+		}
+	}
+	for key, element := range KeyMap {
+		if p.Pressed(pixelgl.Button(element)) {
+			dispatcher.Broadcast(NewEvent(key+"_Pressed", nil))
+		}
+	}
+	for key, element := range KeyMap {
+		if p.JustPressed(pixelgl.Button(element)) {
+			dispatcher.Broadcast(NewEvent(key+"_JustPressed", nil))
+		}
+	}
+	for key, element := range KeyMap {
+		if p.JustReleased(pixelgl.Button(element)) {
+			dispatcher.Broadcast(NewEvent(key+"_JustReleased", nil))
+		}
+	}
 }

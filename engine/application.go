@@ -1,9 +1,7 @@
 package engine
 
-import "github.com/faiface/pixel/pixelgl"
-
 type Application interface {
-	Run(platform *pixelgl.Window, dispatcher Publisher)
+	Run(platform *Platform, dispatcher Publisher)
 	OnEvent(event Event)
 	PushLayer(layer Layer)
 	PushOverlay(overlay Layer)
@@ -19,7 +17,7 @@ type cassiniApp struct {
 	Log        LogLevel
 	Layers     LayerStack
 	Config     AppConfig
-	platform   *pixelgl.Window
+	platform   *Platform
 	dispatcher Publisher
 }
 
@@ -39,7 +37,7 @@ func (c *cassiniApp) GetConfig() AppConfig {
 	return c.Config
 }
 
-func (c *cassiniApp) Run(platform *pixelgl.Window, dispatcher Publisher) {
+func (c *cassiniApp) Run(platform *Platform, dispatcher Publisher) {
 	if c.Log == Trace {
 		LogTrace("Enter: func (c CassiniApp) Run()")
 	}
@@ -53,7 +51,7 @@ func (c *cassiniApp) Run(platform *pixelgl.Window, dispatcher Publisher) {
 			//fmt.Println(l.Name())
 			l.OnUpdate()
 		}
-		c.platform.Update()
+		c.platform.UpdateWindow(dispatcher)
 	}
 
 	if c.Log == Trace {

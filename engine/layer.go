@@ -22,6 +22,9 @@ func (l *DemoLayer) OnDetach() {}
 func (l *DemoLayer) OnUpdate() {}
 func (l *DemoLayer) OnEvent(event Event) {
 	Log(event.Key())
+	if event.Key() == "mouseMove" {
+		Log(event.Contents().(*Vector).String())
+	}
 }
 
 type LayerStack interface {
