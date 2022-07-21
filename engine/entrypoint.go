@@ -5,7 +5,7 @@ import "github.com/faiface/pixel/pixelgl"
 var GlobalApplication Application
 
 func init() {
-	Print("Cassini Game Engine veion 0")
+	Print("Cassini Game Engine version 0")
 }
 
 func InitApp(config AppConfig) Application {
@@ -18,8 +18,6 @@ func Run() {
 }
 
 func run() {
-	dispatcher := NewPublisher()
-	dispatcher.Listen(GlobalApplication)
 	platform, err := NewPlatform(
 		GlobalApplication.GetConfig().Title,
 		GlobalApplication.GetConfig().Width,
@@ -28,5 +26,8 @@ func run() {
 	if err != nil {
 		panic(err)
 	}
-	GlobalApplication.Run(platform, dispatcher)
+	renderer := NewRenderer(platform)
+	dispatcher := NewPublisher()
+	dispatcher.Listen(GlobalApplication)
+	GlobalApplication.Run(platform, renderer, dispatcher)
 }

@@ -1,5 +1,9 @@
 package engine
 
+import "github.com/go-gl/glfw/v3.3/glfw"
+
+type Key uint
+
 const (
 	MOUSE_BUTTON_LEFT   = 0
 	MOUSE_BUTTON_RIGHT  = 1
@@ -131,6 +135,10 @@ const (
 	KEY_RIGHT_SUPER     = 347
 	KEY_LAST            = 348
 )
+
+var GLFWkeyMap = map[glfw.Key]Key{
+	glfw.Key(glfw.MouseButton1): Key(glfw.MouseButton1),
+}
 
 var KeyMap = map[string]int{
 	"MOUSE_BUTTON_LEFT":   MOUSE_BUTTON_LEFT,

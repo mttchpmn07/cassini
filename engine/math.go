@@ -17,6 +17,10 @@ func fromPixelVec(vec pixel.Vec) *Vector {
 	}
 }
 
+func toPixelVec(vec Vector) pixel.Vec {
+	return pixel.V(vec.X, vec.Y)
+}
+
 func (v *Vector) String() string {
 	return fmt.Sprintf("<%v, %v>", v.X, v.Y)
 }

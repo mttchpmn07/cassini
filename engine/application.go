@@ -1,7 +1,7 @@
 package engine
 
 type Application interface {
-	Run(platform *Platform, dispatcher Publisher)
+	Run(platform *Platform, renderer RenderSystem, dispatcher Publisher)
 	OnEvent(event Event)
 	PushLayer(layer Layer)
 	PushOverlay(overlay Layer)
@@ -18,6 +18,7 @@ type cassiniApp struct {
 	Layers     LayerStack
 	Config     AppConfig
 	platform   *Platform
+	renderer   RenderSystem
 	dispatcher Publisher
 }
 
@@ -27,6 +28,7 @@ func NewCassiniApp(config AppConfig) Application {
 		Layers:     NewLayerStack(),
 		Config:     config,
 		platform:   nil,
+		renderer:   nil,
 		dispatcher: nil,
 	}
 
@@ -37,11 +39,12 @@ func (c *cassiniApp) GetConfig() AppConfig {
 	return c.Config
 }
 
-func (c *cassiniApp) Run(platform *Platform, dispatcher Publisher) {
+func (c *cassiniApp) Run(platform *Platform, renderer RenderSystem, dispatcher Publisher) {
 	if c.Log == Trace {
 		LogTrace("Enter: func (c CassiniApp) Run()")
 	}
 	c.platform = platform
+	c.renderer = renderer
 	c.dispatcher = dispatcher
 
 	//Print("Hello from my cassini app!")
@@ -49,7 +52,8 @@ func (c *cassiniApp) Run(platform *Platform, dispatcher Publisher) {
 		layers := c.Layers.Get()
 		for _, l := range layers {
 			//fmt.Println(l.Name())
-			l.OnUpdate()
+			l.OnUpdate(c.renderer)
+
 		}
 		c.platform.UpdateWindow(dispatcher)
 	}

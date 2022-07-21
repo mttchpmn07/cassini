@@ -3,7 +3,7 @@ package engine
 type Layer interface {
 	OnAttach()
 	OnDetach()
-	OnUpdate()
+	OnUpdate(renderer RenderSystem)
 	OnEvent(event Event)
 }
 
@@ -17,9 +17,9 @@ func NewDemoLayer(name string) Layer {
 	}
 }
 
-func (l *DemoLayer) OnAttach() {}
-func (l *DemoLayer) OnDetach() {}
-func (l *DemoLayer) OnUpdate() {}
+func (l *DemoLayer) OnAttach()                      {}
+func (l *DemoLayer) OnDetach()                      {}
+func (l *DemoLayer) OnUpdate(renderer RenderSystem) {}
 func (l *DemoLayer) OnEvent(event Event) {
 	Log(event.Key())
 	if event.Key() == "mouseMove" {

@@ -4,6 +4,31 @@ import (
 	"github.com/mttchpmn07/cassini/engine"
 )
 
+type testLayer struct {
+	Name   string
+	Sprite *engine.DrawObject
+	Circle engine.Circle
+	Rect   engine.Rect
+	Line   engine.Line
+}
+
+func (l *testLayer) OnAttach() {}
+func (l *testLayer) OnDetach() {}
+
+func (l *testLayer) OnUpdate(renderer engine.RenderSystem) {
+	renderer.DrawQuad(l.Rect)
+	renderer.DrawSprite(l.Sprite)
+	renderer.DrawCircle(l.Circle)
+	renderer.DrawLine(l.Line)
+}
+
+func (l *testLayer) OnEvent(event engine.Event) {
+	engine.Log(event.Key())
+	if event.Key() == "mouseMove" {
+		engine.Log(event.Contents().(*engine.Vector).String())
+	}
+}
+
 func main() {
 	config := engine.AppConfig{
 		Title:  "Test App",
@@ -12,6 +37,26 @@ func main() {
 	}
 	app := engine.InitApp(config)
 	app.PushOverlay(engine.NewDemoLayer("Demo Overlay"))
+
+	tl := &testLayer{
+		Name:   "Test Render Layer",
+		Sprite: nil,
+	}
+	pic, err := engine.LoadPicture("./celebrate.png")
+	if err != nil {
+		panic(err)
+	}
+	tl.Sprite = &engine.DrawObject{
+		Spritesheet: pic,
+		Frame:       engine.FromPixelRect(pic.Bounds()),
+		Loc:         engine.Vector{500, 500},
+		Angle:       0,
+		Scale:       0.5,
+	}
+	tl.Circle = engine.NewCircle(100, engine.Vector{500, 500})
+	tl.Rect = engine.NewRect(engine.Vector{700, 700}, engine.Vector{200, 200})
+	tl.Line = engine.NewLine(engine.Vector{200, 700}, engine.Vector{700, 200})
+	app.PushLayer(tl)
 
 	engine.Run()
 }
