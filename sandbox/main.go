@@ -4,19 +4,16 @@ import (
 	"github.com/mttchpmn07/cassini/engine"
 )
 
-func makeApp() engine.Application {
+func main() {
 	config := engine.AppConfig{
 		Title:  "Test App",
 		Width:  1024,
 		Height: 796,
 	}
-	return engine.NewCassiniApp(config)
-}
+	app := engine.InitApp(config)
+	app.PushOverlay(engine.NewDemoLayer("Demo Overlay"))
 
-func main() {
-	app := makeApp()
-
-	engine.Run(app)
+	engine.Run()
 }
 
 /*
