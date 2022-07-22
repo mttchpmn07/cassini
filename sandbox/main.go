@@ -5,27 +5,36 @@ import (
 )
 
 type testLayer struct {
-	Name   string
-	Sprite *engine.DrawObject
-	Circle engine.Circle
-	Rect   engine.Rect
-	Line   engine.Line
+	engine.BaseLayer
+	Name        string
+	Sprite      *engine.DrawObject
+	Circle      engine.Circle
+	Circles     []engine.Circle
+	MouseCircle engine.Circle
+	Rect        engine.Rect
+	Line        engine.Line
 }
 
 func (l *testLayer) OnAttach() {}
 func (l *testLayer) OnDetach() {}
-
-func (l *testLayer) OnUpdate(renderer engine.RenderSystem) {
-	renderer.DrawQuad(l.Rect)
-	renderer.DrawSprite(l.Sprite)
-	renderer.DrawCircle(l.Circle)
-	renderer.DrawLine(l.Line)
+func (l *testLayer) OnUpdate() {
+	l.App.Ren.DrawQuad(l.Rect)
+	l.App.Ren.DrawSprite(l.Sprite)
+	l.App.Ren.DrawCircle(l.Circle)
+	for _, c := range l.Circles {
+		l.App.Ren.DrawCircle(c)
+	}
+	l.App.Ren.DrawCircle(l.MouseCircle)
+	l.App.Ren.DrawLine(l.Line)
 }
 
 func (l *testLayer) OnEvent(event engine.Event) {
 	engine.Log(event.Key())
 	if event.Key() == "mouseMove" {
-		engine.Log(event.Contents().(*engine.Vector).String())
+		l.MouseCircle = engine.NewCircle(50, *event.Contents().(*engine.Vector))
+	}
+	if event.Key() == "MOUSE_BUTTON_LEFT_Pressed" {
+		l.Circles = append(l.Circles, l.MouseCircle)
 	}
 }
 
@@ -46,6 +55,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	tl.Rect = engine.NewRect(engine.Vector{700, 700}, engine.Vector{200, 200})
+	tl.Circle = engine.NewCircle(100, engine.Vector{500, 500})
+	tl.MouseCircle = engine.NewCircle(50, engine.Vector{200, 200})
+	tl.Line = engine.NewLine(engine.Vector{200, 700}, engine.Vector{700, 200})
 	tl.Sprite = &engine.DrawObject{
 		Spritesheet: pic,
 		Frame:       engine.FromPixelRect(pic.Bounds()),
@@ -53,9 +66,6 @@ func main() {
 		Angle:       0,
 		Scale:       0.5,
 	}
-	tl.Circle = engine.NewCircle(100, engine.Vector{500, 500})
-	tl.Rect = engine.NewRect(engine.Vector{700, 700}, engine.Vector{200, 200})
-	tl.Line = engine.NewLine(engine.Vector{200, 700}, engine.Vector{700, 200})
 	app.PushLayer(tl)
 
 	engine.Run()

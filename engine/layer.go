@@ -1,13 +1,23 @@
 package engine
 
+type BaseLayer struct {
+	App *CassiniApp
+}
+
+func (bl *BaseLayer) SetApp(app *CassiniApp) {
+	bl.App = app
+}
+
 type Layer interface {
 	OnAttach()
 	OnDetach()
-	OnUpdate(renderer RenderSystem)
+	OnUpdate()
 	OnEvent(event Event)
+	SetApp(app *CassiniApp)
 }
 
 type DemoLayer struct {
+	BaseLayer
 	Name string
 }
 
@@ -17,9 +27,9 @@ func NewDemoLayer(name string) Layer {
 	}
 }
 
-func (l *DemoLayer) OnAttach()                      {}
-func (l *DemoLayer) OnDetach()                      {}
-func (l *DemoLayer) OnUpdate(renderer RenderSystem) {}
+func (l *DemoLayer) OnAttach() {}
+func (l *DemoLayer) OnDetach() {}
+func (l *DemoLayer) OnUpdate() {}
 func (l *DemoLayer) OnEvent(event Event) {
 	Log(event.Key())
 	if event.Key() == "mouseMove" {

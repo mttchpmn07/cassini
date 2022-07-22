@@ -1,5 +1,7 @@
 package engine
 
+import "golang.org/x/image/colornames"
+
 type Application interface {
 	Run(platform *Platform, renderer RenderSystem, dispatcher Publisher)
 	OnEvent(event Event)
@@ -13,49 +15,47 @@ type AppConfig struct {
 	Width, Height float64
 }
 
-type cassiniApp struct {
-	Log        LogLevel
-	Layers     LayerStack
-	Config     AppConfig
-	platform   *Platform
-	renderer   RenderSystem
-	dispatcher Publisher
+type CassiniApp struct {
+	Log    LogLevel
+	Layers LayerStack
+	Config AppConfig
+	Plat   *Platform
+	Ren    RenderSystem
+	Dis    Publisher
 }
 
 func NewCassiniApp(config AppConfig) Application {
-	app := &cassiniApp{
-		Log:        Err,
-		Layers:     NewLayerStack(),
-		Config:     config,
-		platform:   nil,
-		renderer:   nil,
-		dispatcher: nil,
+	app := &CassiniApp{
+		Log:    Err,
+		Layers: NewLayerStack(),
+		Config: config,
+		Plat:   nil,
+		Ren:    nil,
+		Dis:    nil,
 	}
 
 	return app
 }
 
-func (c *cassiniApp) GetConfig() AppConfig {
+func (c *CassiniApp) GetConfig() AppConfig {
 	return c.Config
 }
 
-func (c *cassiniApp) Run(platform *Platform, renderer RenderSystem, dispatcher Publisher) {
+func (c *CassiniApp) Run(platform *Platform, renderer RenderSystem, dispatcher Publisher) {
 	if c.Log == Trace {
 		LogTrace("Enter: func (c CassiniApp) Run()")
 	}
-	c.platform = platform
-	c.renderer = renderer
-	c.dispatcher = dispatcher
+	c.Plat = platform
+	c.Ren = renderer
+	c.Dis = dispatcher
 
-	//Print("Hello from my cassini app!")
-	for !c.platform.Closed() {
+	for !c.Plat.Closed() {
+		c.Plat.Clear(colornames.Black)
 		layers := c.Layers.Get()
 		for _, l := range layers {
-			//fmt.Println(l.Name())
-			l.OnUpdate(c.renderer)
-
+			l.OnUpdate()
 		}
-		c.platform.UpdateWindow(dispatcher)
+		c.Plat.UpdateWindow(dispatcher)
 	}
 
 	if c.Log == Trace {
@@ -63,7 +63,7 @@ func (c *cassiniApp) Run(platform *Platform, renderer RenderSystem, dispatcher P
 	}
 }
 
-func (c cassiniApp) OnEvent(event Event) {
+func (c *CassiniApp) OnEvent(event Event) {
 	if c.Log == Trace {
 		LogTrace("Enter: func (c cassiniApp) OnEvent(event Event)")
 	}
@@ -81,10 +81,12 @@ func (c cassiniApp) OnEvent(event Event) {
 	}
 }
 
-func (c cassiniApp) PushLayer(layer Layer) {
+func (c *CassiniApp) PushLayer(layer Layer) {
+	layer.SetApp(c)
 	c.Layers.PushLayer(layer)
 }
 
-func (c cassiniApp) PushOverlay(overlay Layer) {
+func (c *CassiniApp) PushOverlay(overlay Layer) {
+	overlay.SetApp(c)
 	c.Layers.PushOverlay(overlay)
 }
