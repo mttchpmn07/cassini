@@ -16,60 +16,15 @@ type testLayer struct {
 	Poly            engine.Polygon
 	DragLine        engine.Line
 	DragLineStarted bool
+	SpriteLocs      []engine.Vector
 }
 
-func (l *testLayer) OnAttach() {}
-func (l *testLayer) OnDetach() {}
-func (l *testLayer) OnUpdate() {
-	l.App.Ren.DrawQuad(l.Rect)
-	l.App.Ren.DrawSprite(l.Sprite)
-	l.App.Ren.DrawCircle(l.Circle)
-	for _, c := range l.Circles {
-		l.App.Ren.DrawCircle(c)
-	}
-	l.App.Ren.DrawCircle(l.MouseCircle)
-	l.App.Ren.DrawLine(l.Line)
-	l.App.Ren.DrawLine(l.DragLine)
-	l.App.Ren.DrawPoly(l.Poly)
-}
-
-func (l *testLayer) OnEvent(event engine.Event) {
-	engine.Log(event.Key())
-	if event.Key() == "mouseMove" {
-		l.MouseCircle = engine.NewCircle(50, *event.Contents().(*engine.Vector))
-		if l.DragLineStarted {
-			l.DragLine.End = *event.Contents().(*engine.Vector)
-		}
-	}
-	if event.Key() == "MOUSE_BUTTON_LEFT_JustPressed" {
-		l.Circles = append(l.Circles, l.MouseCircle)
-	}
-	if event.Key() == "MOUSE_BUTTON_RIGHT_JustPressed" {
-		if l.DragLineStarted {
-			l.DragLine.End = *event.Contents().(*engine.Vector)
-			l.DragLineStarted = false
-		} else {
-			l.DragLine.Start = *event.Contents().(*engine.Vector)
-			l.DragLine.End = *event.Contents().(*engine.Vector)
-			l.DragLineStarted = true
-		}
-	}
-}
-
-func main() {
-	config := engine.AppConfig{
-		Title:  "Test App",
-		Width:  1024,
-		Height: 796,
-	}
-	app := engine.InitApp(config)
-	app.PushOverlay(engine.NewDemoLayer("Demo Overlay"))
-
+func NewTestLyer() *testLayer {
 	tl := &testLayer{
 		Name:   "Test Render Layer",
 		Sprite: nil,
 	}
-	pic, err := engine.LoadPicture("./celebrate.png")
+	pic, err := engine.LoadSpriteSheet("./celebrate.png")
 	if err != nil {
 		panic(err)
 	}
@@ -90,7 +45,63 @@ func main() {
 		Angle:       0,
 		Scale:       0.5,
 	}
-	app.PushLayer(tl)
+	return tl
+}
+
+func (l *testLayer) OnAttach() {}
+func (l *testLayer) OnDetach() {}
+func (l *testLayer) OnUpdate() {
+	l.App.Ren.OpenBatch(l.Sprite.Spritesheet)
+	l.App.Ren.DrawQuad(l.Rect)
+	for _, loc := range l.SpriteLocs {
+		l.App.Ren.DrawSprite(l.Sprite.Moved(loc))
+	}
+	//l.App.Ren.DrawSprite(l.Sprite)
+	l.App.Ren.DrawCircle(l.Circle)
+	for _, c := range l.Circles {
+		l.App.Ren.DrawCircle(c)
+	}
+	l.App.Ren.DrawCircle(l.MouseCircle)
+	l.App.Ren.DrawLine(l.Line)
+	l.App.Ren.DrawLine(l.DragLine)
+	l.App.Ren.DrawPoly(l.Poly)
+	l.App.Ren.CloseBatch()
+}
+
+func (l *testLayer) OnEvent(event engine.Event) {
+	mousePos := *event.Contents().(*engine.Vector)
+	if event.Key() == "mouseMove" {
+		l.MouseCircle = engine.NewCircle(50, mousePos)
+		if l.DragLineStarted {
+			l.DragLine.End = mousePos
+		}
+	}
+	if event.Key() == "MOUSE_BUTTON_LEFT_Pressed" {
+		//l.Circles = append(l.Circles, l.MouseCircle)
+		l.SpriteLocs = append(l.SpriteLocs, mousePos)
+	}
+	if event.Key() == "MOUSE_BUTTON_RIGHT_JustPressed" {
+		if l.DragLineStarted {
+			l.DragLine.End = mousePos
+			l.DragLineStarted = false
+		} else {
+			l.DragLine.Start = mousePos
+			l.DragLine.End = mousePos
+			l.DragLineStarted = true
+		}
+	}
+}
+
+func main() {
+	config := engine.AppConfig{
+		Title:  "Test App",
+		Width:  1024,
+		Height: 796,
+	}
+	app := engine.InitApp(config)
+
+	//app.PushOverlay(engine.NewDemoLayer("Demo Overlay"))
+	app.PushLayer(NewTestLyer())
 
 	engine.Run()
 }

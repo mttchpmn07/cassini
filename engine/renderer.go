@@ -58,7 +58,7 @@ func FromPixelRect(rect pixel.Rect) Rect {
 	return Rect(&rect)
 }
 
-func LoadPicture(path string) (Picture, error) {
+func LoadSpriteSheet(path string) (Picture, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,8 @@ func LoadPicture(path string) (Picture, error) {
 	if err != nil {
 		return nil, err
 	}
-	return pixel.PictureDataFromImage(img), nil
+	spritesheet := pixel.PictureDataFromImage(img)
+	return spritesheet, nil
 }
 
 type RenderSystem interface {
@@ -77,15 +78,22 @@ type RenderSystem interface {
 	DrawQuad(rect Rect)
 	DrawLine(line Line)
 	DrawPoly(poly Polygon)
+	OpenBatch(spritesheet Picture)
+	CloseBatch()
+	BatchRender()
 }
 
 type Renderer struct {
 	platform *Platform
+	batches  []*pixel.Batch
+	curBatch int
 }
 
 func NewRenderer(platform *Platform) RenderSystem {
 	return &Renderer{
 		platform: platform,
+		batches:  []*pixel.Batch{},
+		curBatch: 0,
 	}
 }
 
@@ -98,10 +106,24 @@ type DrawObject struct {
 	Scale       float64
 }
 
+func (do DrawObject) Moved(loc Vector) *DrawObject {
+	do.Loc = loc
+	return &do
+}
+
+func (ren *Renderer) OpenBatch(spritesheet Picture) {
+	batch := pixel.NewBatch(&pixel.TrianglesData{}, spritesheet)
+	ren.batches = append(ren.batches, batch)
+}
+
+func (ren *Renderer) CloseBatch() {
+	ren.curBatch++
+}
+
 func (ren *Renderer) DrawSprite(do *DrawObject) {
 	trans := pixel.IM.Scaled(pixel.ZV, do.Scale).Rotated(pixel.ZV, do.Angle)
 	sprite := pixel.NewSprite(do.Spritesheet, *do.Frame)
-	sprite.Draw(ren.platform, trans.Moved(do.Loc.toPixelVec()))
+	sprite.Draw(ren.batches[ren.curBatch], trans.Moved(do.Loc.toPixelVec()))
 }
 
 func (ren *Renderer) DrawCircle(c Circle) {
@@ -109,7 +131,7 @@ func (ren *Renderer) DrawCircle(c Circle) {
 	imd.Color = colornames.White
 	imd.Push(c.Center)
 	imd.Circle(c.Radius, 2)
-	imd.Draw(ren.platform)
+	imd.Draw(ren.batches[ren.curBatch])
 }
 
 func (ren *Renderer) DrawQuad(rect Rect) {
@@ -120,7 +142,7 @@ func (ren *Renderer) DrawQuad(rect Rect) {
 	imd.Push(rect.Max)
 	imd.Push(pixel.V(rect.Max.X, rect.Min.Y))
 	imd.Polygon(0)
-	imd.Draw(ren.platform)
+	imd.Draw(ren.batches[ren.curBatch])
 }
 
 func (ren *Renderer) DrawLine(line Line) {
@@ -129,7 +151,7 @@ func (ren *Renderer) DrawLine(line Line) {
 	imd.Push(line.Start.toPixelVec())
 	imd.Push(line.End.toPixelVec())
 	imd.Polygon(2)
-	imd.Draw(ren.platform)
+	imd.Draw(ren.batches[ren.curBatch])
 }
 
 func (ren *Renderer) DrawPoly(poly Polygon) {
@@ -139,7 +161,15 @@ func (ren *Renderer) DrawPoly(poly Polygon) {
 		imd.Push(p.toPixelVec())
 	}
 	imd.Polygon(2)
-	imd.Draw(ren.platform)
+	imd.Draw(ren.batches[ren.curBatch])
+}
+
+func (ren *Renderer) BatchRender() {
+	for _, batch := range ren.batches {
+		batch.Draw(ren.platform)
+		batch.Clear()
+	}
+	ren.curBatch = 0
 }
 
 // Update renders each entity to its batch and draws the batches based on the z value from CLocation

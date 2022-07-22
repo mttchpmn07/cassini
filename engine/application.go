@@ -55,6 +55,7 @@ func (c *CassiniApp) Run(platform *Platform, renderer RenderSystem, dispatcher P
 		for _, l := range layers {
 			l.OnUpdate()
 		}
+		c.Ren.BatchRender()
 		c.Plat.UpdateWindow(dispatcher)
 	}
 
@@ -83,10 +84,12 @@ func (c *CassiniApp) OnEvent(event Event) {
 
 func (c *CassiniApp) PushLayer(layer Layer) {
 	layer.SetApp(c)
+	layer.OnAttach()
 	c.Layers.PushLayer(layer)
 }
 
 func (c *CassiniApp) PushOverlay(overlay Layer) {
 	overlay.SetApp(c)
+	overlay.OnAttach()
 	c.Layers.PushOverlay(overlay)
 }
