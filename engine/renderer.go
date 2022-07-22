@@ -11,54 +11,34 @@ import (
 	"golang.org/x/image/colornames"
 )
 
-//type Batch *pixel.Batch
-type Picture pixel.Picture
-type Rect *pixel.Rect
-type Circle *pixel.Circle
-type Line *line
-type line struct {
-	Start Vector
-	End   Vector
-}
-type Polygon *poly
-type poly struct {
-	Points []Vector
+type DrawObject struct {
+	Spritesheet Picture
+	Frame       Rect
+	Loc         Vector
+	Angle       float64
+	Scale       float64
 }
 
-func NewRect(min Vector, max Vector) Rect {
-	return &pixel.Rect{
-		Min: min.toPixelVec(),
-		Max: max.toPixelVec(),
+func NewDrawObject(spritePath string, startLoc Vector, angle, scale float64) (*DrawObject, error) {
+	pic, err := loadSpriteSheet(spritePath)
+	if err != nil {
+		return nil, err
 	}
+	return &DrawObject{
+		Spritesheet: pic,
+		Frame:       FromPixelRect(pic.Bounds()),
+		Loc:         startLoc,
+		Angle:       angle,
+		Scale:       scale,
+	}, nil
 }
 
-func NewCircle(radius float64, location Vector) Circle {
-	return &pixel.Circle{
-		Radius: radius,
-		Center: location.toPixelVec(),
-	}
+func (do DrawObject) Moved(loc Vector) *DrawObject {
+	do.Loc = loc
+	return &do
 }
 
-func NewLine(start Vector, end Vector) Line {
-	return &line{
-		Start: start,
-		End:   end,
-	}
-}
-
-func NewPolygon(points ...Vector) Polygon {
-	var vectors []Vector
-	vectors = append(vectors, points...)
-	return &poly{
-		Points: vectors,
-	}
-}
-
-func FromPixelRect(rect pixel.Rect) Rect {
-	return Rect(&rect)
-}
-
-func LoadSpriteSheet(path string) (Picture, error) {
+func loadSpriteSheet(path string) (Picture, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -70,6 +50,55 @@ func LoadSpriteSheet(path string) (Picture, error) {
 	}
 	spritesheet := pixel.PictureDataFromImage(img)
 	return spritesheet, nil
+}
+
+type Picture pixel.Picture
+type Rect *pixel.Rect
+
+func NewRect(min Vector, max Vector) Rect {
+	return &pixel.Rect{
+		Min: min.toPixelVec(),
+		Max: max.toPixelVec(),
+	}
+}
+
+func FromPixelRect(rect pixel.Rect) Rect {
+	return Rect(&rect)
+}
+
+type Circle *pixel.Circle
+
+func NewCircle(radius float64, location Vector) Circle {
+	return &pixel.Circle{
+		Radius: radius,
+		Center: location.toPixelVec(),
+	}
+}
+
+type Line *line
+type line struct {
+	Start Vector
+	End   Vector
+}
+
+func NewLine(start Vector, end Vector) Line {
+	return &line{
+		Start: start,
+		End:   end,
+	}
+}
+
+type Polygon *poly
+type poly struct {
+	Points []Vector
+}
+
+func NewPolygon(points ...Vector) Polygon {
+	var vectors []Vector
+	vectors = append(vectors, points...)
+	return &poly{
+		Points: vectors,
+	}
 }
 
 type RenderSystem interface {
@@ -95,20 +124,6 @@ func NewRenderer(platform *Platform) RenderSystem {
 		batches:  []*pixel.Batch{},
 		curBatch: 0,
 	}
-}
-
-type DrawObject struct {
-	//Batch       Batch
-	Spritesheet Picture
-	Frame       Rect
-	Loc         Vector
-	Angle       float64
-	Scale       float64
-}
-
-func (do DrawObject) Moved(loc Vector) *DrawObject {
-	do.Loc = loc
-	return &do
 }
 
 func (ren *Renderer) OpenBatch(spritesheet Picture) {
@@ -171,81 +186,3 @@ func (ren *Renderer) BatchRender() {
 	}
 	ren.curBatch = 0
 }
-
-// Update renders each entity to its batch and draws the batches based on the z value from CLocation
-//sudo code of what is happening here
-//
-//	layers = map layer => []drawObjs
-//	batches = set batch
-//	for entity e
-//		build drawObj(location, rotation, batch, frame)
-//		layers[layer].append(drawObj)
-//	for layer l in sorted layers
-//		for drawObj do in layers[l]
-//			do.Render
-//		for batch b in batches
-//			b.Draw(win)
-//			b.Clear()
-/*
-func (br *SBatchRenderer) Update(args ...interface{}) error {
-	win := args[0].(*pixelgl.Window)
-
-	layers := map[int][]*drawObject{}
-	var exists = struct{}{}
-	batches := map[*pixel.Batch]struct{}{}
-	for _, e := range br.controlEntities {
-		sp, err := components.GetCProperties(e)
-		if err != nil {
-			return err
-		}
-		if !sp.Active {
-			continue
-		}
-		an, err := components.GetCAnimation(e)
-		if err != nil {
-			return err
-		}
-		curFrame := an.GetCurrentFrame()
-		ba, err := components.GetCBatchAsset(e)
-		if err != nil {
-			return err
-		}
-		loc, err := components.GetCLocation(e)
-		if err != nil {
-			return err
-		}
-		do := &drawObject{
-			Batch:       ba.Batch,
-			Spritesheet: &ba.Spritesheet,
-			Frame:       &curFrame,
-			Loc:         &loc.Loc,
-			Angle:       sp.Angle,
-			Scale:       sp.Scale,
-		}
-		if _, OK := layers[loc.Z]; !OK {
-			layers[loc.Z] = []*drawObject{}
-		}
-		layers[loc.Z] = append(layers[loc.Z], do)
-		if _, c := batches[ba.Batch]; !c {
-			batches[ba.Batch] = exists
-		}
-	}
-	keys := make([]int, 0, len(layers))
-	for k := range layers {
-		keys = append(keys, k)
-	}
-	sKeys := sort.IntSlice(keys)
-	sort.Sort(sKeys)
-	for _, k := range sKeys {
-		layer := layers[k]
-		for _, do := range layer {
-			do.render()
-		}
-		for b := range batches {
-			b.Draw(win)
-			b.Clear()
-		}
-	}
-	return nil
-}
-*/

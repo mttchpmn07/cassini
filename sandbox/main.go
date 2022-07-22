@@ -21,30 +21,25 @@ type testLayer struct {
 
 func NewTestLyer() *testLayer {
 	tl := &testLayer{
-		Name:   "Test Render Layer",
-		Sprite: nil,
+		Name:        "Test Render Layer",
+		Sprite:      nil,
+		Rect:        engine.NewRect(engine.Vec(700, 700), engine.Vec(200, 200)),
+		Circle:      engine.NewCircle(100, engine.Vec(500, 500)),
+		MouseCircle: engine.NewCircle(50, engine.Vec(200, 200)),
+		Line:        engine.NewLine(engine.Vec(200, 700), engine.Vec(700, 200)),
+		DragLine:    engine.NewLine(engine.Vec(200, 700), engine.Vec(700, 200)),
+		Poly: engine.NewPolygon([]engine.Vector{
+			engine.Vec(300, 300),
+			engine.Vec(200, 200),
+			engine.Vec(0, 250),
+		}...),
 	}
-	pic, err := engine.LoadSpriteSheet("./celebrate.png")
+	var err error
+	tl.Sprite, err = engine.NewDrawObject("./celebrate.png", engine.Vec(500, 500), 0, 0.5)
 	if err != nil {
 		panic(err)
 	}
-	tl.Rect = engine.NewRect(engine.Vec(700, 700), engine.Vec(200, 200))
-	tl.Circle = engine.NewCircle(100, engine.Vec(500, 500))
-	tl.MouseCircle = engine.NewCircle(50, engine.Vec(200, 200))
-	tl.Line = engine.NewLine(engine.Vec(200, 700), engine.Vec(700, 200))
-	tl.DragLine = engine.NewLine(engine.Vec(200, 700), engine.Vec(700, 200))
-	tl.Poly = engine.NewPolygon([]engine.Vector{
-		engine.Vec(300, 300),
-		engine.Vec(200, 200),
-		engine.Vec(0, 250),
-	}...)
-	tl.Sprite = &engine.DrawObject{
-		Spritesheet: pic,
-		Frame:       engine.FromPixelRect(pic.Bounds()),
-		Loc:         engine.Vec(500, 500),
-		Angle:       0,
-		Scale:       0.5,
-	}
+
 	return tl
 }
 
