@@ -27,15 +27,15 @@ type poly struct {
 
 func NewRect(min Vector, max Vector) Rect {
 	return &pixel.Rect{
-		Min: toPixelVec(min),
-		Max: toPixelVec(max),
+		Min: min.toPixelVec(),
+		Max: max.toPixelVec(),
 	}
 }
 
 func NewCircle(radius float64, location Vector) Circle {
 	return &pixel.Circle{
 		Radius: radius,
-		Center: toPixelVec(location),
+		Center: location.toPixelVec(),
 	}
 }
 
@@ -76,6 +76,7 @@ type RenderSystem interface {
 	DrawCircle(c Circle)
 	DrawQuad(rect Rect)
 	DrawLine(line Line)
+	DrawPoly(poly Polygon)
 }
 
 type Renderer struct {
@@ -100,16 +101,8 @@ type DrawObject struct {
 func (ren *Renderer) DrawSprite(do *DrawObject) {
 	trans := pixel.IM.Scaled(pixel.ZV, do.Scale).Rotated(pixel.ZV, do.Angle)
 	sprite := pixel.NewSprite(do.Spritesheet, *do.Frame)
-	sprite.Draw(ren.platform, trans.Moved(toPixelVec(do.Loc)))
+	sprite.Draw(ren.platform, trans.Moved(do.Loc.toPixelVec()))
 }
-
-/*
-	poly := imdraw.New(nil)
-	for _, p := range shape.Points {
-		poly.Push(pixelPoint(p.Add(shape.Pos).Sub(shape.Offset)))
-	}
-	poly.Polygon(2).DrawCircle()
-*/
 
 func (ren *Renderer) DrawCircle(c Circle) {
 	imd := imdraw.New(nil)
@@ -133,14 +126,20 @@ func (ren *Renderer) DrawQuad(rect Rect) {
 func (ren *Renderer) DrawLine(line Line) {
 	imd := imdraw.New(nil)
 	imd.Color = colornames.Green
-	imd.Push(toPixelVec(line.Start))
-	imd.Push(toPixelVec(line.End))
+	imd.Push(line.Start.toPixelVec())
+	imd.Push(line.End.toPixelVec())
 	imd.Polygon(2)
 	imd.Draw(ren.platform)
 }
 
 func (ren *Renderer) DrawPoly(poly Polygon) {
-
+	imd := imdraw.New(nil)
+	imd.Color = colornames.Red
+	for _, p := range poly.Points {
+		imd.Push(p.toPixelVec())
+	}
+	imd.Polygon(2)
+	imd.Draw(ren.platform)
 }
 
 // Update renders each entity to its batch and draws the batches based on the z value from CLocation

@@ -13,6 +13,7 @@ type testLayer struct {
 	MouseCircle engine.Circle
 	Rect        engine.Rect
 	Line        engine.Line
+	Poly        engine.Polygon
 }
 
 func (l *testLayer) OnAttach() {}
@@ -26,6 +27,7 @@ func (l *testLayer) OnUpdate() {
 	}
 	l.App.Ren.DrawCircle(l.MouseCircle)
 	l.App.Ren.DrawLine(l.Line)
+	l.App.Ren.DrawPoly(l.Poly)
 }
 
 func (l *testLayer) OnEvent(event engine.Event) {
@@ -55,14 +57,19 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	tl.Rect = engine.NewRect(engine.Vector{700, 700}, engine.Vector{200, 200})
-	tl.Circle = engine.NewCircle(100, engine.Vector{500, 500})
-	tl.MouseCircle = engine.NewCircle(50, engine.Vector{200, 200})
-	tl.Line = engine.NewLine(engine.Vector{200, 700}, engine.Vector{700, 200})
+	tl.Rect = engine.NewRect(engine.Vec(700, 700), engine.Vec(200, 200))
+	tl.Circle = engine.NewCircle(100, engine.Vec(500, 500))
+	tl.MouseCircle = engine.NewCircle(50, engine.Vec(200, 200))
+	tl.Line = engine.NewLine(engine.Vec(200, 700), engine.Vec(700, 200))
+	tl.Poly = engine.NewPolygon([]engine.Vector{
+		engine.Vec(300, 300),
+		engine.Vec(200, 200),
+		engine.Vec(0, 250),
+	}...)
 	tl.Sprite = &engine.DrawObject{
 		Spritesheet: pic,
 		Frame:       engine.FromPixelRect(pic.Bounds()),
-		Loc:         engine.Vector{500, 500},
+		Loc:         engine.Vec(500, 500),
 		Angle:       0,
 		Scale:       0.5,
 	}
