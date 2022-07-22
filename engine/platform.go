@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"math"
+
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
 )
@@ -28,25 +30,26 @@ func (p *Platform) UpdateWindow(dispatcher Publisher) {
 }
 
 func (p *Platform) updateKeys(dispatcher Publisher) {
+	mousePos := Vec(math.Inf(1), math.Inf(1)).toPixelVec()
 	if p.MouseInsideWindow() {
-		mousePos := p.MousePosition()
+		mousePos = p.MousePosition()
 		if mousePos != p.MousePreviousPosition() {
 			dispatcher.Broadcast(NewEvent("mouseMove", fromPixelVec(mousePos)))
 		}
 	}
 	for key, element := range KeyMap {
 		if p.Pressed(pixelgl.Button(element)) {
-			dispatcher.Broadcast(NewEvent(key+"_Pressed", nil))
+			dispatcher.Broadcast(NewEvent(key+"_Pressed", fromPixelVec(mousePos)))
 		}
 	}
 	for key, element := range KeyMap {
 		if p.JustPressed(pixelgl.Button(element)) {
-			dispatcher.Broadcast(NewEvent(key+"_JustPressed", nil))
+			dispatcher.Broadcast(NewEvent(key+"_JustPressed", fromPixelVec(mousePos)))
 		}
 	}
 	for key, element := range KeyMap {
 		if p.JustReleased(pixelgl.Button(element)) {
-			dispatcher.Broadcast(NewEvent(key+"_JustReleased", nil))
+			dispatcher.Broadcast(NewEvent(key+"_JustReleased", fromPixelVec(mousePos)))
 		}
 	}
 }

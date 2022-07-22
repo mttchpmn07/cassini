@@ -6,14 +6,16 @@ import (
 
 type testLayer struct {
 	engine.BaseLayer
-	Name        string
-	Sprite      *engine.DrawObject
-	Circle      engine.Circle
-	Circles     []engine.Circle
-	MouseCircle engine.Circle
-	Rect        engine.Rect
-	Line        engine.Line
-	Poly        engine.Polygon
+	Name            string
+	Sprite          *engine.DrawObject
+	Circle          engine.Circle
+	Circles         []engine.Circle
+	MouseCircle     engine.Circle
+	Rect            engine.Rect
+	Line            engine.Line
+	Poly            engine.Polygon
+	DragLine        engine.Line
+	DragLineStarted bool
 }
 
 func (l *testLayer) OnAttach() {}
@@ -27,6 +29,7 @@ func (l *testLayer) OnUpdate() {
 	}
 	l.App.Ren.DrawCircle(l.MouseCircle)
 	l.App.Ren.DrawLine(l.Line)
+	l.App.Ren.DrawLine(l.DragLine)
 	l.App.Ren.DrawPoly(l.Poly)
 }
 
@@ -34,9 +37,22 @@ func (l *testLayer) OnEvent(event engine.Event) {
 	engine.Log(event.Key())
 	if event.Key() == "mouseMove" {
 		l.MouseCircle = engine.NewCircle(50, *event.Contents().(*engine.Vector))
+		if l.DragLineStarted {
+			l.DragLine.End = *event.Contents().(*engine.Vector)
+		}
 	}
 	if event.Key() == "MOUSE_BUTTON_LEFT_JustPressed" {
 		l.Circles = append(l.Circles, l.MouseCircle)
+	}
+	if event.Key() == "MOUSE_BUTTON_RIGHT_JustPressed" {
+		if l.DragLineStarted {
+			l.DragLine.End = *event.Contents().(*engine.Vector)
+			l.DragLineStarted = false
+		} else {
+			l.DragLine.Start = *event.Contents().(*engine.Vector)
+			l.DragLine.End = *event.Contents().(*engine.Vector)
+			l.DragLineStarted = true
+		}
 	}
 }
 
@@ -61,6 +77,7 @@ func main() {
 	tl.Circle = engine.NewCircle(100, engine.Vec(500, 500))
 	tl.MouseCircle = engine.NewCircle(50, engine.Vec(200, 200))
 	tl.Line = engine.NewLine(engine.Vec(200, 700), engine.Vec(700, 200))
+	tl.DragLine = engine.NewLine(engine.Vec(200, 700), engine.Vec(700, 200))
 	tl.Poly = engine.NewPolygon([]engine.Vector{
 		engine.Vec(300, 300),
 		engine.Vec(200, 200),
