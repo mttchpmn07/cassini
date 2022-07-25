@@ -39,7 +39,7 @@ func (p *Platform) UpdateWindow(dispatcher Publisher) {
 }
 
 func (p *Platform) updateKeys(dispatcher Publisher) {
-	mousePos := Vec(math.Inf(1), math.Inf(1))
+	mousePos := NewVector(math.Inf(1), math.Inf(1))
 	if p.MouseInsideWindow() {
 		mousePos = p.MousePos()
 		if mousePos != p.MousePrevPos() {

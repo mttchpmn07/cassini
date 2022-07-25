@@ -8,13 +8,9 @@ type testLayer struct {
 	engine.BaseLayer
 	Name            string
 	Sprite          *engine.DrawObject
-	Circle          engine.Circle
-	Circles         []engine.Circle
-	MouseCircle     engine.Circle
-	Rect            engine.Rect
-	Line            engine.Line
-	Poly            engine.Polygon
-	DragLine        engine.Line
+	Shapes          []engine.Shape
+	MouseCircle     engine.Circ
+	DragLine        engine.Lin
 	DragLineStarted bool
 	SpriteLocs      []engine.Vector
 }
@@ -24,18 +20,19 @@ func NewTestLyer() *testLayer {
 		BaseLayer:       engine.BaseLayer{},
 		Name:            "Test Render Layer",
 		Sprite:          nil,
-		Circle:          engine.NewCircle(100, engine.Vec(500, 500)),
-		Circles:         []engine.Circle{},
-		MouseCircle:     engine.NewCircle(50, engine.Vec(200, 200)),
-		Rect:            engine.NewRect(engine.Vec(700, 700), engine.Vec(200, 200)),
-		Line:            engine.NewLine(engine.Vec(200, 700), engine.Vec(700, 200)),
-		Poly:            engine.NewPolygon([]engine.Vector{engine.Vec(300, 300), engine.Vec(200, 200), engine.Vec(0, 250)}...),
-		DragLine:        engine.NewLine(engine.Vec(200, 700), engine.Vec(700, 200)),
+		Shapes:          []engine.Shape{},
+		MouseCircle:     engine.NewCircle(50, engine.NewVector(200, 200)),
+		DragLine:        engine.NewLine(engine.NewVector(200, 700), engine.NewVector(700, 200)),
 		DragLineStarted: false,
 		SpriteLocs:      []engine.Vector{},
 	}
+	tl.Shapes = append(tl.Shapes, engine.NewCircle(100, engine.NewVector(500, 500)))
+	tl.Shapes = append(tl.Shapes, engine.NewPolygon([]engine.Vector{engine.NewVector(300, 300), engine.NewVector(200, 200), engine.NewVector(0, 250)}...))
+	tl.Shapes = append(tl.Shapes, engine.NewLine(engine.NewVector(200, 700), engine.NewVector(700, 200)))
+	tl.Shapes = append(tl.Shapes, engine.NewRectangle(engine.NewVector(700, 700), engine.NewVector(200, 200)))
+
 	var err error
-	tl.Sprite, err = engine.NewDrawObject("./celebrate.png", engine.Vec(500, 500), 0, 0.5)
+	tl.Sprite, err = engine.NewDrawObject("./celebrate.png", engine.NewVector(500, 500), 0, 0.5)
 	if err != nil {
 		panic(err)
 	}
@@ -47,18 +44,12 @@ func (l *testLayer) OnAttach() {}
 func (l *testLayer) OnDetach() {}
 func (l *testLayer) OnUpdate() {
 	l.App.Ren.OpenBatch(l.Sprite.Spritesheet)
-	l.App.Ren.DrawQuad(l.Rect)
 	for _, loc := range l.SpriteLocs {
 		l.App.Ren.DrawSprite(l.Sprite.Moved(loc))
 	}
-	l.App.Ren.DrawCircle(l.Circle)
-	for _, c := range l.Circles {
-		l.App.Ren.DrawCircle(c)
-	}
-	l.App.Ren.DrawCircle(l.MouseCircle)
-	l.App.Ren.DrawLine(l.Line)
-	l.App.Ren.DrawLine(l.DragLine)
-	l.App.Ren.DrawPoly(l.Poly)
+	l.App.Ren.DrawShapes(l.Shapes)
+	l.App.Ren.DrawShape(l.MouseCircle)
+	l.App.Ren.DrawShape(l.DragLine)
 	l.App.Ren.CloseBatch()
 }
 

@@ -26,7 +26,7 @@ func run() {
 	if err != nil {
 		panic(err)
 	}
-	renderer := NewRenderer(platform)
+	renderer := NewRenderSystem(platform)
 	dispatcher := NewPublisher()
 	dispatcher.Listen(GlobalApplication)
 	GlobalApplication.Run(platform, renderer, dispatcher)
