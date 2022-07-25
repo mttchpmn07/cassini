@@ -21,18 +21,18 @@ type testLayer struct {
 
 func NewTestLyer() *testLayer {
 	tl := &testLayer{
-		Name:        "Test Render Layer",
-		Sprite:      nil,
-		Rect:        engine.NewRect(engine.Vec(700, 700), engine.Vec(200, 200)),
-		Circle:      engine.NewCircle(100, engine.Vec(500, 500)),
-		MouseCircle: engine.NewCircle(50, engine.Vec(200, 200)),
-		Line:        engine.NewLine(engine.Vec(200, 700), engine.Vec(700, 200)),
-		DragLine:    engine.NewLine(engine.Vec(200, 700), engine.Vec(700, 200)),
-		Poly: engine.NewPolygon([]engine.Vector{
-			engine.Vec(300, 300),
-			engine.Vec(200, 200),
-			engine.Vec(0, 250),
-		}...),
+		BaseLayer:       engine.BaseLayer{},
+		Name:            "Test Render Layer",
+		Sprite:          nil,
+		Circle:          engine.NewCircle(100, engine.Vec(500, 500)),
+		Circles:         []engine.Circle{},
+		MouseCircle:     engine.NewCircle(50, engine.Vec(200, 200)),
+		Rect:            engine.NewRect(engine.Vec(700, 700), engine.Vec(200, 200)),
+		Line:            engine.NewLine(engine.Vec(200, 700), engine.Vec(700, 200)),
+		Poly:            engine.NewPolygon([]engine.Vector{engine.Vec(300, 300), engine.Vec(200, 200), engine.Vec(0, 250)}...),
+		DragLine:        engine.NewLine(engine.Vec(200, 700), engine.Vec(700, 200)),
+		DragLineStarted: false,
+		SpriteLocs:      []engine.Vector{},
 	}
 	var err error
 	tl.Sprite, err = engine.NewDrawObject("./celebrate.png", engine.Vec(500, 500), 0, 0.5)
