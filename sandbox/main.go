@@ -1,6 +1,8 @@
 package main
 
 import (
+	"math"
+
 	"github.com/mttchpmn07/cassini/engine"
 )
 
@@ -22,7 +24,7 @@ func NewTestLyer() *testLayer {
 		Sprite:          nil,
 		Shapes:          []engine.Shape{},
 		MouseCircle:     engine.NewCircle(50, engine.NewVector(200, 200)),
-		DragLine:        engine.NewLine(engine.NewVector(200, 700), engine.NewVector(700, 200)),
+		DragLine:        engine.NewLine(engine.NewVector(math.Inf(1), math.Inf(1)), engine.NewVector(math.Inf(1), math.Inf(1))),
 		DragLineStarted: false,
 		SpriteLocs:      []engine.Vector{},
 	}
@@ -55,17 +57,16 @@ func (l *testLayer) OnUpdate() {
 
 func (l *testLayer) OnEvent(event engine.Event) {
 	mousePos := engine.VectorFromEvent(event)
-	if event.Key() == "mouseMove" {
+	switch event.Key() {
+	case "mouseMove":
 		l.MouseCircle = engine.NewCircle(50, mousePos)
 		if l.DragLineStarted {
 			l.DragLine.End = mousePos
 		}
-	}
-	if event.Key() == "MOUSE_BUTTON_LEFT_Pressed" {
+	case "MOUSE_BUTTON_LEFT_Pressed":
 		//l.Circles = append(l.Circles, l.MouseCircle)
 		l.SpriteLocs = append(l.SpriteLocs, mousePos)
-	}
-	if event.Key() == "MOUSE_BUTTON_RIGHT_JustPressed" {
+	case "MOUSE_BUTTON_RIGHT_JustPressed":
 		if l.DragLineStarted {
 			l.DragLine.End = mousePos
 			l.DragLineStarted = false
@@ -74,6 +75,23 @@ func (l *testLayer) OnEvent(event engine.Event) {
 			l.DragLine.End = mousePos
 			l.DragLineStarted = true
 		}
+	case "KEY_RIGHT_Pressed":
+		for i := range l.Shapes {
+			l.Shapes[i] = l.Shapes[i].Move(engine.NewVector(10, 0))
+		}
+	case "KEY_LEFT_Pressed":
+		for i := range l.Shapes {
+			l.Shapes[i] = l.Shapes[i].Move(engine.NewVector(-10, 0))
+		}
+	case "KEY_DOWN_Pressed":
+		for i := range l.Shapes {
+			l.Shapes[i] = l.Shapes[i].Move(engine.NewVector(0, -10))
+		}
+	case "KEY_UP_Pressed":
+		for i := range l.Shapes {
+			l.Shapes[i] = l.Shapes[i].Move(engine.NewVector(0, 10))
+		}
+	default:
 	}
 }
 

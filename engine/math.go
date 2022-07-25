@@ -28,6 +28,7 @@ func (s shape) String() string {
 
 type Shape interface {
 	Type() shape
+	Move(v Vector) Shape
 }
 
 type Vector struct{ *pixel.Vec }
@@ -43,24 +44,52 @@ type poly struct {
 	Points []Vector
 }
 
+func (vec Vector) Add(other Vector) Vector {
+	return NewVector(vec.X+other.X, vec.Y+other.Y)
+}
+
 func (v Vector) Type() shape {
 	return Point
+}
+
+func (vec Vector) Move(v Vector) Shape {
+	return v
 }
 
 func (r Rect) Type() shape {
 	return Rectangle
 }
 
+func (r Rect) Move(v Vector) Shape {
+	return NewRectangle(fromPixelVec(r.Max).Add(v), fromPixelVec(r.Min).Add(v))
+}
+
 func (c Circ) Type() shape {
 	return Circle
+}
+
+func (c Circ) Move(v Vector) Shape {
+	return NewCircle(c.Radius, fromPixelVec(c.Center).Add(v))
 }
 
 func (l Lin) Type() shape {
 	return Line
 }
 
+func (l Lin) Move(v Vector) Shape {
+	return NewLine(l.Start.Add(v), l.End.Add(v))
+}
+
 func (p Poly) Type() shape {
 	return Polygon
+}
+
+func (p Poly) Move(v Vector) Shape {
+	newPoints := []Vector{}
+	for i := range p.Points {
+		newPoints = append(newPoints, p.Points[i].Add(v))
+	}
+	return NewPolygon(newPoints...)
 }
 
 func VectorFromEvent(event Event) Vector {
