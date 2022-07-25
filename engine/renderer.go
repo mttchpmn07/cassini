@@ -12,6 +12,7 @@ import (
 	"golang.org/x/image/colornames"
 )
 
+type Picture pixel.Picture
 type DrawObject struct {
 	Spritesheet Picture
 	Frame       Rect
@@ -51,65 +52,6 @@ func loadSpriteSheet(path string) (Picture, error) {
 	}
 	spritesheet := pixel.PictureDataFromImage(img)
 	return spritesheet, nil
-}
-
-type Picture pixel.Picture
-type Rect *pixel.Rect
-
-func NewRect(min Vector, max Vector) Rect {
-	return &pixel.Rect{
-		Min: min.toPixelVec(),
-		Max: max.toPixelVec(),
-	}
-}
-
-func FromPixelRect(rect pixel.Rect) Rect {
-	return Rect(&rect)
-}
-
-type Circle *pixel.Circle
-
-func NewCircle(radius float64, location Vector) Circle {
-	return &pixel.Circle{
-		Radius: radius,
-		Center: location.toPixelVec(),
-	}
-}
-
-type Line *line
-type line struct {
-	Start Vector
-	End   Vector
-}
-
-func NewLine(start Vector, end Vector) Line {
-	return &line{
-		Start: start,
-		End:   end,
-	}
-}
-
-type Polygon *poly
-type poly struct {
-	Points []Vector
-}
-
-func NewPolygon(points ...Vector) Polygon {
-	var vectors []Vector
-	vectors = append(vectors, points...)
-	return &poly{
-		Points: vectors,
-	}
-}
-
-func NewPolygonFromLines(lines []line) Polygon {
-	var vectors []Vector
-	for _, l := range lines {
-		vectors = append(vectors, l.Start)
-	}
-	return &poly{
-		Points: vectors,
-	}
 }
 
 type RenderSystem interface {
@@ -155,7 +97,7 @@ func NewRenderer(platform *Platform) RenderSystem {
 
 func (ren *Renderer) DrawSprite(do *DrawObject) {
 	trans := pixel.IM.Scaled(pixel.ZV, do.Scale).Rotated(pixel.ZV, do.Angle)
-	sprite := pixel.NewSprite(do.Spritesheet, *do.Frame)
+	sprite := pixel.NewSprite(do.Spritesheet, *do.Frame.Rect)
 	sprite.Draw(ren.batches[ren.curBatch], trans.Moved(do.Loc.toPixelVec()))
 }
 

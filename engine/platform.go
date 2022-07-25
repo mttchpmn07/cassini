@@ -11,6 +11,15 @@ type Platform struct {
 	*pixelgl.Window
 }
 
+type Button struct {
+	*pixelgl.Button
+}
+
+func ButtonFromInt(i int) Button {
+	b := pixelgl.Button(i)
+	return Button{&b}
+}
+
 func NewPlatform(title string, width float64, height float64) (*Platform, error) {
 	cfg := pixelgl.WindowConfig{
 		Title:  title,
@@ -30,26 +39,46 @@ func (p *Platform) UpdateWindow(dispatcher Publisher) {
 }
 
 func (p *Platform) updateKeys(dispatcher Publisher) {
-	mousePos := Vec(math.Inf(1), math.Inf(1)).toPixelVec()
+	mousePos := Vec(math.Inf(1), math.Inf(1))
 	if p.MouseInsideWindow() {
-		mousePos = p.MousePosition()
-		if mousePos != p.MousePreviousPosition() {
-			dispatcher.Broadcast(NewEvent("mouseMove", fromPixelVec(mousePos)))
+		mousePos = p.MousePos()
+		if mousePos != p.MousePrevPos() {
+			dispatcher.Broadcast(NewEvent("mouseMove", mousePos))
 		}
 	}
 	for key, element := range KeyMap {
-		if p.Pressed(pixelgl.Button(element)) {
-			dispatcher.Broadcast(NewEvent(key+"_Pressed", fromPixelVec(mousePos)))
+		if p.Press(ButtonFromInt(element)) {
+			dispatcher.Broadcast(NewEvent(key+"_Pressed", mousePos))
 		}
 	}
 	for key, element := range KeyMap {
-		if p.JustPressed(pixelgl.Button(element)) {
-			dispatcher.Broadcast(NewEvent(key+"_JustPressed", fromPixelVec(mousePos)))
+		if p.Tap(ButtonFromInt(element)) {
+			dispatcher.Broadcast(NewEvent(key+"_JustPressed", mousePos))
 		}
 	}
 	for key, element := range KeyMap {
-		if p.JustReleased(pixelgl.Button(element)) {
-			dispatcher.Broadcast(NewEvent(key+"_JustReleased", fromPixelVec(mousePos)))
+		if p.Release(ButtonFromInt(element)) {
+			dispatcher.Broadcast(NewEvent(key+"_JustReleased", mousePos))
 		}
 	}
+}
+
+func (p *Platform) MousePos() Vector {
+	return fromPixelVec(p.MousePosition())
+}
+
+func (p *Platform) MousePrevPos() Vector {
+	return fromPixelVec(p.MousePreviousPosition())
+}
+
+func (p *Platform) Press(button Button) bool {
+	return p.Pressed(*button.Button)
+}
+
+func (p *Platform) Tap(button Button) bool {
+	return p.JustPressed(*button.Button)
+}
+
+func (p *Platform) Release(button Button) bool {
+	return p.JustReleased(*button.Button)
 }

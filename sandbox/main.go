@@ -51,7 +51,6 @@ func (l *testLayer) OnUpdate() {
 	for _, loc := range l.SpriteLocs {
 		l.App.Ren.DrawSprite(l.Sprite.Moved(loc))
 	}
-	//l.App.Ren.DrawSprite(l.Sprite)
 	l.App.Ren.DrawCircle(l.Circle)
 	for _, c := range l.Circles {
 		l.App.Ren.DrawCircle(c)
@@ -64,7 +63,7 @@ func (l *testLayer) OnUpdate() {
 }
 
 func (l *testLayer) OnEvent(event engine.Event) {
-	mousePos := *event.Contents().(*engine.Vector)
+	mousePos := engine.VectorFromEvent(event)
 	if event.Key() == "mouseMove" {
 		l.MouseCircle = engine.NewCircle(50, mousePos)
 		if l.DragLineStarted {
