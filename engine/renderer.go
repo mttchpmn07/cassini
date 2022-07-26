@@ -12,34 +12,75 @@ import (
 	"golang.org/x/image/colornames"
 )
 
+type Rasterable interface {
+	Raster() *imdraw.IMDraw
+	Color(c color.Color)
+	Thickness(t float64)
+	C() color.Color
+	T() float64
+}
+
+type RasterProperties struct {
+	color     color.Color
+	thickness float64
+}
+
+func NewRasterable() *RasterProperties {
+	return &RasterProperties{
+		color:     colornames.White,
+		thickness: 2,
+	}
+}
+
+func (rp *RasterProperties) Raster() *imdraw.IMDraw {
+	return imdraw.New(nil)
+}
+
+func (rp *RasterProperties) Color(c color.Color) {
+	rp.color = c
+}
+
+func (rp *RasterProperties) Thickness(t float64) {
+	rp.thickness = t
+}
+
+func (rp *RasterProperties) C() color.Color {
+	return rp.color
+}
+
+func (rp *RasterProperties) T() float64 {
+	return rp.thickness
+}
+
 type Picture pixel.Picture
 type DrawObject struct {
 	Spritesheet Picture
-	Frame       Rect
-	Loc         Vector
+	Frame       pixel.Rect
+	Loc         pixel.Vec
 	Angle       float64
 	Scale       float64
 }
 
-func NewDrawObject(spritePath string, startLoc Vector, angle, scale float64) (*DrawObject, error) {
+func NewDrawObject(spritePath string, startLoc pixel.Vec, angle, scale float64) (*DrawObject, error) {
 	pic, err := loadSpriteSheet(spritePath)
 	if err != nil {
 		return nil, err
 	}
 	return &DrawObject{
 		Spritesheet: pic,
-		Frame:       FromPixelRect(pic.Bounds()),
+		Frame:       pic.Bounds(),
 		Loc:         startLoc,
 		Angle:       angle,
 		Scale:       scale,
 	}, nil
 }
 
+/*
 func (do DrawObject) Moved(loc Vector) *DrawObject {
 	do.Loc = loc
 	return &do
 }
-
+*/
 func loadSpriteSheet(path string) (Picture, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -73,8 +114,8 @@ type RenderSystem interface {
 	SetColor(color color.Color)
 	SetThickness(thickness float64)
 	DrawSprite(do *DrawObject)
-	DrawShape(shape Shape)
-	DrawShapes(shapes []Shape)
+	DrawShape(shape Rasterable)
+	DrawShapes(shapes []Rasterable)
 }
 
 func NewRenderSystem(platform *Platform) RenderSystem {
@@ -116,70 +157,22 @@ func (ren *Renderer) SetThickness(thickness float64) {
 
 func (ren *Renderer) DrawSprite(do *DrawObject) {
 	trans := pixel.IM.Scaled(pixel.ZV, do.Scale).Rotated(pixel.ZV, do.Angle)
-	sprite := pixel.NewSprite(do.Spritesheet, *do.Frame.Rect)
-	sprite.Draw(ren.batches[ren.curBatch], trans.Moved(do.Loc.toPixelVec()))
+	sprite := pixel.NewSprite(do.Spritesheet, do.Frame)
+	sprite.Draw(ren.batches[ren.curBatch], trans.Moved(do.Loc))
 }
 
-func (ren *Renderer) DrawShape(s Shape) {
-	switch s.Type() {
-	case Point:
-		ren.drawPoint(s.(Vector))
-	case Line:
-		ren.drawLine(s.(Lin))
-	case Circle:
-		ren.drawCircle(s.(Circ))
-	case Rectangle:
-		ren.drawRectangle(s.(Rect))
-	case Polygon:
-		ren.drawPolygon(s.(Poly))
-	default:
-	}
+func (ren *Renderer) Draw(pen Rasterable) {
+	imd := pen.Raster()
+	imd.Draw(ren.batches[ren.curBatch])
 }
 
-func (ren *Renderer) DrawShapes(ss []Shape) {
+func (ren *Renderer) DrawShape(s Rasterable) {
+	imd := s.Raster()
+	imd.Draw(ren.batches[ren.curBatch])
+}
+
+func (ren *Renderer) DrawShapes(ss []Rasterable) {
 	for _, s := range ss {
 		ren.DrawShape(s)
 	}
-}
-
-func (ren *Renderer) drawPoint(v Vector) {
-	ren.drawCircle(NewCircle(1, v))
-}
-
-func (ren *Renderer) drawCircle(c Circ) {
-	imd := imdraw.New(nil)
-	imd.Color = ren.properties.color
-	imd.Push(c.Center)
-	imd.Circle(c.Radius, ren.properties.thickness)
-	imd.Draw(ren.batches[ren.curBatch])
-}
-
-func (ren *Renderer) drawRectangle(rect Rect) {
-	imd := imdraw.New(nil)
-	imd.Color = ren.properties.color
-	imd.Push(rect.Min)
-	imd.Push(pixel.V(rect.Min.X, rect.Max.Y))
-	imd.Push(rect.Max)
-	imd.Push(pixel.V(rect.Max.X, rect.Min.Y))
-	imd.Polygon(ren.properties.thickness)
-	imd.Draw(ren.batches[ren.curBatch])
-}
-
-func (ren *Renderer) drawLine(line Lin) {
-	imd := imdraw.New(nil)
-	imd.Color = ren.properties.color
-	imd.Push(line.Start.toPixelVec())
-	imd.Push(line.End.toPixelVec())
-	imd.Polygon(ren.properties.thickness)
-	imd.Draw(ren.batches[ren.curBatch])
-}
-
-func (ren *Renderer) drawPolygon(poly Poly) {
-	imd := imdraw.New(nil)
-	imd.Color = ren.properties.color
-	for _, p := range poly.Points {
-		imd.Push(p.toPixelVec())
-	}
-	imd.Polygon(ren.properties.thickness)
-	imd.Draw(ren.batches[ren.curBatch])
 }

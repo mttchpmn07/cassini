@@ -4,49 +4,51 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/faiface/pixel"
 	"github.com/mttchpmn07/cassini/engine"
+	p "github.com/mttchpmn07/cassini/engine/primatives"
 	"golang.org/x/image/colornames"
 )
 
 type testLayer struct {
 	engine.BaseLayer
-	Name            string
 	Sprite          *engine.DrawObject
-	Shapes          []engine.Shape
-	NoCollideShapes []engine.Shape
-	MousePoint      engine.Shape
-	MousePoly       engine.Shape
-	DragLine        engine.Lin
+	Shapes          []p.Primative
+	NoCollideShapes []p.Primative
+	MousePoint      p.Primative
+	MousePoly       p.Primative
+	DragLine        p.Lin
 	DragLineStarted bool
-	SpriteLocs      []engine.Vector
+	SpriteLocs      []p.Vector
 	shapeSelector   int
 }
 
 func NewTestLyer() *testLayer {
 	tl := &testLayer{
-		BaseLayer:       engine.BaseLayer{},
-		Name:            "Test Render Layer",
+		BaseLayer: engine.BaseLayer{
+			Name: "Test Render Layer",
+		},
 		Sprite:          nil,
-		Shapes:          []engine.Shape{},
-		MousePoint:      engine.NewVector(200, 200),
-		MousePoly:       engine.NewPolygon([]engine.Vector{engine.NewVector(math.Inf(1), math.Inf(1)), engine.NewVector(math.Inf(1), math.Inf(1)), engine.NewVector(math.Inf(1), math.Inf(1))}...),
-		DragLine:        engine.NewLine(engine.NewVector(math.Inf(1), math.Inf(1)), engine.NewVector(math.Inf(1), math.Inf(1))),
+		Shapes:          []p.Primative{},
+		MousePoint:      p.NewVector(200, 200),
+		MousePoly:       p.NewPolygon([]p.Vector{p.NewVector(math.Inf(1), math.Inf(1)), p.NewVector(math.Inf(1), math.Inf(1)), p.NewVector(math.Inf(1), math.Inf(1))}...),
+		DragLine:        p.NewLine(p.NewVector(math.Inf(1), math.Inf(1)), p.NewVector(math.Inf(1), math.Inf(1))),
 		DragLineStarted: false,
-		SpriteLocs:      []engine.Vector{},
+		SpriteLocs:      []p.Vector{},
 	}
-	tl.Shapes = append(tl.Shapes, engine.NewCircle(100, engine.NewVector(600, 500)))
-	tl.Shapes = append(tl.Shapes, engine.NewPolygon([]engine.Vector{engine.NewVector(0, 250), engine.NewVector(300, 300), engine.NewVector(200, 200)}...))
-	tl.Shapes = append(tl.Shapes, engine.NewPolygon([]engine.Vector{engine.NewVector(0, 250), engine.NewVector(300, 300), engine.NewVector(200, 200)}...).Move(engine.NewVector(500, 300)))
-	tl.Shapes = append(tl.Shapes, engine.NewPolygon([]engine.Vector{engine.NewVector(0, 250), engine.NewVector(300, 300), engine.NewVector(200, 200)}...).Move(engine.NewVector(0, 400)))
-	tl.Shapes = append(tl.Shapes, engine.NewRectangle(engine.NewVector(0, 0), engine.NewVector(100, 100)))
-	tl.Shapes = append(tl.Shapes, engine.NewRectangle(engine.NewVector(800, 800), engine.NewVector(700, 700)))
-	tl.Shapes = append(tl.Shapes, engine.NewRectangle(engine.NewVector(0, 800), engine.NewVector(100, 700)))
-	tl.Shapes = append(tl.Shapes, engine.NewLine(engine.NewVector(0, 0), engine.NewVector(1500, 1500)))
-	tl.Shapes = append(tl.Shapes, engine.NewVector(600, 50))
-	//tl.Shapes = append(tl.Shapes, engine.NewRectangle(engine.NewVector(400, 400), engine.NewVector(500, 500)))
+	tl.Shapes = append(tl.Shapes, p.NewCircle(100, p.NewVector(600, 500)))
+	tl.Shapes = append(tl.Shapes, p.NewPolygon([]p.Vector{p.NewVector(0, 250), p.NewVector(300, 300), p.NewVector(200, 200)}...))
+	tl.Shapes = append(tl.Shapes, p.NewPolygon([]p.Vector{p.NewVector(0, 250), p.NewVector(300, 300), p.NewVector(200, 200)}...).Move(p.NewVector(500, 300)))
+	tl.Shapes = append(tl.Shapes, p.NewPolygon([]p.Vector{p.NewVector(0, 250), p.NewVector(300, 300), p.NewVector(200, 200)}...).Move(p.NewVector(0, 400)))
+	tl.Shapes = append(tl.Shapes, p.NewRectangle(p.NewVector(0, 0), p.NewVector(100, 100)))
+	tl.Shapes = append(tl.Shapes, p.NewRectangle(p.NewVector(800, 800), p.NewVector(700, 700)))
+	tl.Shapes = append(tl.Shapes, p.NewRectangle(p.NewVector(0, 800), p.NewVector(100, 700)))
+	tl.Shapes = append(tl.Shapes, p.NewLine(p.NewVector(0, 0), p.NewVector(1500, 1500)))
+	tl.Shapes = append(tl.Shapes, p.NewVector(600, 50))
+	//tl.Shapes = append(tl.Shapes, p.NewRectangle(p.NewVector(400, 400), p.NewVector(500, 500)))
 
 	var err error
-	tl.Sprite, err = engine.NewDrawObject("./celebrate.png", engine.NewVector(500, 500), 0, 0.5)
+	tl.Sprite, err = engine.NewDrawObject("./celebrate.png", pixel.V(500, 500), 0, 0.5)
 	if err != nil {
 		panic(err)
 	}
@@ -54,18 +56,18 @@ func NewTestLyer() *testLayer {
 	return tl
 }
 
-func MouseShape(mousePos engine.Vector, shapeSelector int) engine.Shape {
+func MouseShape(mousePos p.Vector, shapeSelector int) engine.Shape {
 	switch shapeSelector {
 	case 0:
-		return engine.NewVector(mousePos.X, mousePos.Y)
+		return p.NewVector(mousePos.X, mousePos.Y)
 	case 1:
-		return engine.NewPolygon([]engine.Vector{engine.NewVector(50, 0), engine.NewVector(50, 50), engine.NewVector(0, 50)}...).Move(mousePos)
+		return p.NewPolygon([]p.Vector{p.NewVector(50, 0), p.NewVector(50, 50), p.NewVector(0, 50)}...).Move(mousePos)
 	case 2:
-		return engine.NewRectangle(engine.NewVector(0, 0), engine.NewVector(50, 50)).Move(mousePos)
+		return p.NewRectangle(p.NewVector(0, 0), p.NewVector(50, 50)).Move(mousePos)
 	case 4:
-		return engine.NewLine(engine.NewVector(10, 0), engine.NewVector(0, 10)).Move(mousePos)
+		return p.NewLine(p.NewVector(10, 0), p.NewVector(0, 10)).Move(mousePos)
 	}
-	return engine.NewCircle(5, mousePos)
+	return p.NewCircle(5, mousePos)
 }
 
 func (l *testLayer) OnAttach() {}
@@ -84,7 +86,7 @@ func (l *testLayer) OnUpdate() {
 }
 
 func (l *testLayer) OnEvent(event engine.Event) {
-	mousePos := engine.VectorFromEvent(event)
+	mousePos := p.VectorFromEvent(event)
 	mousePoint := engine.Shape(mousePos)
 	switch event.Key() {
 	case "mouseMove":
@@ -95,11 +97,11 @@ func (l *testLayer) OnEvent(event engine.Event) {
 		}
 		l.App.Ren.SetColor(colornames.White)
 		for _, s := range l.Shapes {
-			//if _, col := engine.Collides(mousePoint, s); col {
-			if _, col := engine.Collides(l.MousePoly, s); col {
+			//if _, col := p.Collides(mousePoint, s); col {
+			if _, col := p.Collides(l.MousePoly, s); col {
 				l.App.Ren.SetColor(colornames.Red)
 				l.NoCollideShapes = append(l.NoCollideShapes, MouseShape(mousePos, l.shapeSelector))
-				//l.NoCollideShapes = append(l.NoCollideShapes, engine.NewVector(mousePos.X, mousePos.Y))
+				//l.NoCollideShapes = append(l.NoCollideShapes, p.NewVector(mousePos.X, mousePos.Y))
 			}
 		}
 	case "MOUSE_BUTTON_LEFT_Pressed":
@@ -111,26 +113,26 @@ func (l *testLayer) OnEvent(event engine.Event) {
 			l.DragLine.End = mousePos
 			l.DragLineStarted = false
 		} else {
-			l.Shapes = append(l.Shapes, engine.NewLine(l.DragLine.Start, l.DragLine.End))
+			l.Shapes = append(l.Shapes, p.NewLine(l.DragLine.Start, l.DragLine.End))
 			l.DragLine.Start = mousePos
 			l.DragLine.End = mousePos
 			l.DragLineStarted = true
 		}
 	case "KEY_RIGHT_Pressed":
 		for i := range l.Shapes {
-			l.Shapes[i] = l.Shapes[i].Move(engine.NewVector(10, 0))
+			l.Shapes[i] = l.Shapes[i].Move(p.NewVector(10, 0))
 		}
 	case "KEY_LEFT_Pressed":
 		for i := range l.Shapes {
-			l.Shapes[i] = l.Shapes[i].Move(engine.NewVector(-10, 0))
+			l.Shapes[i] = l.Shapes[i].Move(p.NewVector(-10, 0))
 		}
 	case "KEY_DOWN_Pressed":
 		for i := range l.Shapes {
-			l.Shapes[i] = l.Shapes[i].Move(engine.NewVector(0, -10))
+			l.Shapes[i] = l.Shapes[i].Move(p.NewVector(0, -10))
 		}
 	case "KEY_UP_Pressed":
 		for i := range l.Shapes {
-			l.Shapes[i] = l.Shapes[i].Move(engine.NewVector(0, 10))
+			l.Shapes[i] = l.Shapes[i].Move(p.NewVector(0, 10))
 		}
 	case "KEY_SPACE_JustPressed":
 		l.shapeSelector += 1
@@ -140,7 +142,6 @@ func (l *testLayer) OnEvent(event engine.Event) {
 	default:
 	}
 }
-
 func main() {
 	config := engine.AppConfig{
 		Title:  "Test App",
@@ -148,6 +149,7 @@ func main() {
 		Height: 796,
 	}
 	app := engine.InitApp(config)
+	app.PushOverlay(engine.NewDemoLayer("DemoLayer"))
 
 	app.PushLayer(NewTestLyer())
 

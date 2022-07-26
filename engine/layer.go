@@ -1,7 +1,8 @@
 package engine
 
 type BaseLayer struct {
-	App *CassiniApp
+	Name string
+	App  *CassiniApp
 }
 
 func (bl *BaseLayer) SetApp(app *CassiniApp) {
@@ -18,12 +19,13 @@ type Layer interface {
 
 type DemoLayer struct {
 	BaseLayer
-	Name string
 }
 
 func NewDemoLayer(name string) Layer {
 	return &DemoLayer{
-		Name: name,
+		BaseLayer: BaseLayer{
+			Name: name,
+		},
 	}
 }
 
@@ -32,9 +34,6 @@ func (l *DemoLayer) OnDetach() {}
 func (l *DemoLayer) OnUpdate() {}
 func (l *DemoLayer) OnEvent(event Event) {
 	Log(event.Key())
-	if event.Key() == "mouseMove" {
-		Log(event.Contents().(*Vector).String())
-	}
 }
 
 type LayerStack interface {

@@ -39,10 +39,10 @@ func (p *Platform) UpdateWindow(dispatcher Publisher) {
 }
 
 func (p *Platform) updateKeys(dispatcher Publisher) {
-	mousePos := NewVector(math.Inf(1), math.Inf(1))
+	mousePos := pixel.V(math.Inf(1), math.Inf(1))
 	if p.MouseInsideWindow() {
-		mousePos = p.MousePos()
-		if mousePos != p.MousePrevPos() {
+		mousePos = p.MousePosition()
+		if mousePos != p.MousePreviousPosition() {
 			dispatcher.Broadcast(NewEvent("mouseMove", mousePos))
 		}
 	}
@@ -63,6 +63,7 @@ func (p *Platform) updateKeys(dispatcher Publisher) {
 	}
 }
 
+/*
 func (p *Platform) MousePos() Vector {
 	return fromPixelVec(p.MousePosition())
 }
@@ -70,6 +71,7 @@ func (p *Platform) MousePos() Vector {
 func (p *Platform) MousePrevPos() Vector {
 	return fromPixelVec(p.MousePreviousPosition())
 }
+*/
 
 func (p *Platform) Press(button Button) bool {
 	return p.Pressed(*button.Button)
