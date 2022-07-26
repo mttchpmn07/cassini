@@ -3,6 +3,7 @@ module github.com/mttchpmn07/cassini/engine
 go 1.18
 
 require (
+	github.com/Tarliton/collision2d v0.1.0
 	github.com/faiface/pixel v0.10.0
 	github.com/fatih/color v1.13.0
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20220712193148-63cf1f4ef61f

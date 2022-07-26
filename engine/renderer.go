@@ -120,24 +120,24 @@ func (ren *Renderer) DrawSprite(do *DrawObject) {
 	sprite.Draw(ren.batches[ren.curBatch], trans.Moved(do.Loc.toPixelVec()))
 }
 
-func (ren *Renderer) DrawShape(shape Shape) {
-	switch shape.Type() {
+func (ren *Renderer) DrawShape(s Shape) {
+	switch s.Type() {
 	case Point:
-		ren.drawPoint(shape.(Vector))
+		ren.drawPoint(s.(Vector))
 	case Line:
-		ren.drawLine(shape.(Lin))
+		ren.drawLine(s.(Lin))
 	case Circle:
-		ren.drawCircle(shape.(Circ))
+		ren.drawCircle(s.(Circ))
 	case Rectangle:
-		ren.drawRectangle(shape.(Rect))
+		ren.drawRectangle(s.(Rect))
 	case Polygon:
-		ren.drawPolygon(shape.(Poly))
+		ren.drawPolygon(s.(Poly))
 	default:
 	}
 }
 
-func (ren *Renderer) DrawShapes(shapes []Shape) {
-	for _, s := range shapes {
+func (ren *Renderer) DrawShapes(ss []Shape) {
+	for _, s := range ss {
 		ren.DrawShape(s)
 	}
 }
