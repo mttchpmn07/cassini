@@ -120,7 +120,13 @@ func (vec Vector) Collides(other Shape) (Collision, bool) {
 	col := false
 	switch other.Type() {
 	case Point:
+		p := other.(Vector)
+		c := collision2d.NewCircle(p.toCollision2d(), 1)
+		col = collision2d.PointInCircle(v, c)
 	case Line:
+		l := other.(Lin)
+		c := collision2d.NewCircle(v, 1)
+		col = TestCircleLine(c, l)
 	case Circle:
 		c := other.(Circ).toCollision2d()
 		col = collision2d.PointInCircle(v, c)
@@ -159,6 +165,8 @@ func (r Rect) Collides(other Shape) (Collision, bool) {
 		v := other.(Vector).toCollision2d()
 		col = collision2d.PointInPolygon(v, rec)
 	case Line:
+		l := other.(Lin)
+		col, res = TestPolygonLine(rec, l)
 	case Circle:
 		c := other.(Circ).toCollision2d()
 		col, res = collision2d.TestCirclePolygon(c, rec)
@@ -213,7 +221,7 @@ func (c Circ) Collides(other Shape) (Collision, bool) {
 		v := other.(Vector).toCollision2d()
 		col = collision2d.PointInCircle(v, cir)
 	case Line:
-		col = TestLineCircle(cir, other.(Lin))
+		col = TestCircleLine(cir, other.(Lin))
 	case Circle:
 		otherC := other.(Circ).toCollision2d()
 		col, res = collision2d.TestCircleCircle(cir, otherC)
@@ -261,10 +269,21 @@ func (l Lin) Collides(other Shape) (Collision, bool) {
 	col := false
 	switch other.Type() {
 	case Point:
+		v := other.(Vector).toCollision2d()
+		c := collision2d.NewCircle(v, 1)
+		col = TestCircleLine(c, l)
 	case Line:
+		l2 := other.(Lin)
+		col = TestLineLine(l, l2)
 	case Circle:
+		c := other.(Circ).toCollision2d()
+		col = TestCircleLine(c, l)
 	case Rectangle:
+		r := other.(Rect).toCollision2d()
+		col, res = TestPolygonLine(r, l)
 	case Polygon:
+		p := other.(Poly).toCollision2d()
+		col, res = TestPolygonLine(p, l)
 	default:
 	}
 	return Collision{&res}, col
@@ -316,8 +335,10 @@ func (p Poly) Collides(other Shape) (Collision, bool) {
 	switch other.Type() {
 	case Point:
 		v := other.(Vector).toCollision2d()
-		res.AInB = collision2d.PointInPolygon(v, pol)
+		col = collision2d.PointInPolygon(v, pol)
 	case Line:
+		l := other.(Lin)
+		col, res = TestPolygonLine(pol, l)
 	case Circle:
 		c := other.(Circ).toCollision2d()
 		col, res = collision2d.TestPolygonCircle(pol, c)
@@ -372,8 +393,7 @@ func TestCirclePolygon(circle collision2d.Circle, polygon collision2d.Polygon) (
 		p1 := points[currentIndex].Add(polygon.Offset).Add(polygon.Pos)
 		p2 := points[nextIndex].Add(polygon.Offset).Add(polygon.Pos)
 		reconSide := fromCollision2dEdges(p1, p2)
-		// edges are BS...
-		col = TestLineCircle(circle, reconSide)
+		col = TestCircleLine(circle, reconSide)
 		if col {
 			return col, res
 		}
@@ -381,11 +401,11 @@ func TestCirclePolygon(circle collision2d.Circle, polygon collision2d.Polygon) (
 	return col, res
 }
 
-func TestLineCircle(circle collision2d.Circle, edge Lin) bool {
-	x1 := edge.Start.X - circle.Pos.X
-	y1 := edge.Start.Y - circle.Pos.Y
-	x2 := edge.End.X - circle.Pos.X
-	y2 := edge.End.Y - circle.Pos.Y
+func TestCircleLine(circle collision2d.Circle, line Lin) bool {
+	x1 := line.Start.X - circle.Pos.X
+	y1 := line.Start.Y - circle.Pos.Y
+	x2 := line.End.X - circle.Pos.X
+	y2 := line.End.Y - circle.Pos.Y
 
 	rSquared := circle.R * circle.R
 
@@ -414,4 +434,42 @@ func TestLineCircle(circle collision2d.Circle, edge Lin) bool {
 		return false
 	}
 	return true
+}
+
+func TestLineLine(lin1, lin2 Lin) bool {
+	x1, y1, x2, y2 := lin1.Start.X, lin1.Start.Y, lin1.End.X, lin1.End.Y
+	x3, y3, x4, y4 := lin2.Start.X, lin2.Start.Y, lin2.End.X, lin2.End.Y
+
+	uA := ((x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1))
+	uB := ((x2-x1)*(y1-y3) - (y2-y1)*(x1-x3)) / ((y4-y3)*(x2-x1) - (x4-x3)*(y2-y1))
+
+	if uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1 {
+		return true
+	}
+	return false
+}
+
+func TestPolygonLine(poly collision2d.Polygon, lin Lin) (bool, collision2d.Response) {
+	res := collision2d.NewResponse()
+	res = res.NotColliding()
+	col := collision2d.PointInPolygon(lin.Start.toCollision2d(), poly) || collision2d.PointInPolygon(lin.End.toCollision2d(), poly)
+	if col {
+		return col, res
+	}
+	nextIndex := 0
+	points := poly.Points
+	for currentIndex := range points {
+		nextIndex = currentIndex + 1
+		if nextIndex == len(points) {
+			nextIndex = 0
+		}
+		p1 := points[currentIndex].Add(poly.Offset).Add(poly.Pos)
+		p2 := points[nextIndex].Add(poly.Offset).Add(poly.Pos)
+		reconSide := fromCollision2dEdges(p1, p2)
+		col = TestLineLine(lin, reconSide)
+		if col {
+			return col, res
+		}
+	}
+	return col, res
 }

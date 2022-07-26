@@ -41,7 +41,8 @@ func NewTestLyer() *testLayer {
 	tl.Shapes = append(tl.Shapes, engine.NewRectangle(engine.NewVector(0, 0), engine.NewVector(100, 100)))
 	tl.Shapes = append(tl.Shapes, engine.NewRectangle(engine.NewVector(800, 800), engine.NewVector(700, 700)))
 	tl.Shapes = append(tl.Shapes, engine.NewRectangle(engine.NewVector(0, 800), engine.NewVector(100, 700)))
-	//tl.Shapes = append(tl.Shapes, engine.NewLine(engine.NewVector(0, 0), engine.NewVector(1500, 1500)))
+	tl.Shapes = append(tl.Shapes, engine.NewLine(engine.NewVector(0, 0), engine.NewVector(1500, 1500)))
+	tl.Shapes = append(tl.Shapes, engine.NewVector(600, 50))
 	//tl.Shapes = append(tl.Shapes, engine.NewRectangle(engine.NewVector(400, 400), engine.NewVector(500, 500)))
 
 	var err error
@@ -62,6 +63,7 @@ func MouseShape(mousePos engine.Vector, shapeSelector int) engine.Shape {
 	case 2:
 		return engine.NewRectangle(engine.NewVector(0, 0), engine.NewVector(50, 50)).Move(mousePos)
 	case 4:
+		return engine.NewLine(engine.NewVector(10, 0), engine.NewVector(0, 10)).Move(mousePos)
 	}
 	return engine.NewCircle(5, mousePos)
 }
@@ -132,7 +134,7 @@ func (l *testLayer) OnEvent(event engine.Event) {
 		}
 	case "KEY_SPACE_JustPressed":
 		l.shapeSelector += 1
-		if l.shapeSelector > 4 {
+		if l.shapeSelector > 5 {
 			l.shapeSelector = 0
 		}
 	default:
