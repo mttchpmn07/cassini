@@ -48,7 +48,6 @@ func NewTestLyer() *testLayer {
 	tl.Shapes = append(tl.Shapes, p.NewRectangle(p.NewVector(0, 800), p.NewVector(100, 700)))
 	tl.Shapes = append(tl.Shapes, p.NewLine(p.NewVector(0, 0), p.NewVector(1500, 1500)))
 	tl.Shapes = append(tl.Shapes, p.NewVector(600, 50))
-	//tl.Shapes = append(tl.Shapes, p.NewRectangle(p.NewVector(400, 400), p.NewVector(500, 500)))
 
 	var err error
 	tl.Sprite, err = graphics.NewDrawObject("./celebrate.png", pixel.V(500, 500), 0, 0.5)
@@ -68,9 +67,9 @@ func MouseShape(mousePos p.Vector, shapeSelector int) p.Primative {
 	case 2:
 		return p.NewRectangle(p.NewVector(0, 0), p.NewVector(50, 50)).Move(mousePos)
 	case 4:
-		return p.NewLine(p.NewVector(10, 0), p.NewVector(0, 10)).Move(mousePos)
+		return p.NewLine(p.NewVector(25, 0), p.NewVector(0, 25)).Move(mousePos)
 	}
-	return p.NewCircle(5, mousePos)
+	return p.NewCircle(20, mousePos)
 }
 
 func (l *testLayer) OnAttach() {}
@@ -104,16 +103,13 @@ func (l *testLayer) OnEvent(event events.Event) {
 		}
 		l.App.Ren.SetColor(colornames.White)
 		for _, s := range l.Shapes {
-			//if _, col := p.Collides(mousePoint, s); col {
 			if _, col := p.Collides(l.MousePoly, s); col {
-				//engine.Log("Collision")
-				l.App.Ren.SetColor(colornames.Red)
-				l.NoCollideShapes = append(l.NoCollideShapes, MouseShape(mousePos, l.shapeSelector))
-				//l.NoCollideShapes = append(l.NoCollideShapes, p.NewVector(mousePos.X, mousePos.Y))
+				newShape := MouseShape(mousePos, l.shapeSelector)
+				newShape.Color(colornames.Red)
+				l.NoCollideShapes = append(l.NoCollideShapes, newShape)
 			}
 		}
 	case "MOUSE_BUTTON_LEFT_Pressed":
-		//l.Circles = append(l.Circles, l.MouseCircle)
 		l.SpriteLocs = append(l.SpriteLocs, mousePos)
 	case "MOUSE_BUTTON_RIGHT_JustPressed":
 		engine.Log(fmt.Sprintf("%v", mousePos))
