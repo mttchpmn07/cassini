@@ -65,6 +65,6 @@ func (c Circ) Raster() *imdraw.IMDraw {
 	imd := imdraw.New(nil)
 	imd.Color = c.C()
 	imd.Push(c.Center)
-	imd.Circle(1, c.T())
+	imd.Circle(c.Radius, c.T())
 	return imd
 }

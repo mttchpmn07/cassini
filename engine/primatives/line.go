@@ -72,6 +72,6 @@ func (l Lin) Raster() *imdraw.IMDraw {
 	imd.Color = l.C()
 	imd.Push(l.Start.toPixelVec())
 	imd.Push(l.End.toPixelVec())
-	imd.Circle(1, l.T())
+	imd.Line(l.T())
 	return imd
 }

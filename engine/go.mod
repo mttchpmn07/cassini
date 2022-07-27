@@ -2,7 +2,11 @@ module github.com/mttchpmn07/cassini/engine
 
 go 1.18
 
-replace github.com/mttchpmn07/cassini/engine/event => ./event
+replace github.com/mttchpmn07/cassini/engine/events => ./events
+
+replace github.com/mttchpmn07/cassini/engine/primatives => ./primatives
+
+replace github.com/mttchpmn07/cassini/engine/graphics => ./graphics
 
 require (
 	github.com/Tarliton/collision2d v0.1.0

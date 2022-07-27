@@ -4,6 +4,12 @@ go 1.18
 
 replace github.com/mttchpmn07/cassini/engine => ../engine
 
+replace github.com/mttchpmn07/cassini/engine/events => ../engine/events
+
+replace github.com/mttchpmn07/cassini/engine/primatives => ../engine/primatives
+
+replace github.com/mttchpmn07/cassini/engine/graphics => ../engine/graphics
+
 require (
 	github.com/faiface/pixel v0.10.0
 	github.com/mttchpmn07/cassini/engine v0.0.0-00010101000000-000000000000
