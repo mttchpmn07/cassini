@@ -34,6 +34,11 @@ func Collides(s Collider, other Collider) (Collision, bool) {
 	return res, col
 }
 
+func TestCircleCircle(circleA Circ, circleB Circ) (bool, Collision) {
+	col, res := collision2d.TestCircleCircle(circleA.toCollision2d(), circleB.toCollision2d())
+	return col, Collision{&res}
+}
+
 func TestCirclePolygon(circle collision2d.Circle, polygon collision2d.Polygon) (bool, collision2d.Response) {
 	res := collision2d.NewResponse()
 	res = res.NotColliding()
@@ -110,7 +115,7 @@ func TestLineLine(lin1, lin2 Lin) bool {
 func TestPolygonLine(poly collision2d.Polygon, lin Lin) (bool, collision2d.Response) {
 	res := collision2d.NewResponse()
 	res = res.NotColliding()
-	col := collision2d.PointInPolygon(lin.Start.toCollision2d(), poly) || collision2d.PointInPolygon(lin.End.toCollision2d(), poly)
+	col := collision2d.PointInPolygon(lin.Start.ToCollision2d(), poly) || collision2d.PointInPolygon(lin.End.ToCollision2d(), poly)
 	if col {
 		return col, res
 	}
@@ -130,4 +135,20 @@ func TestPolygonLine(poly collision2d.Polygon, lin Lin) (bool, collision2d.Respo
 		}
 	}
 	return col, res
+}
+
+func TestPolygonPolygon(polyA Poly, polyB Poly) (bool, Collision) {
+	col, res := collision2d.TestPolygonPolygon(polyA.toCollision2d(), polyB.toCollision2d())
+	return col, Collision{&res}
+}
+
+func TestDotDot(dotA Dot, dotB Dot) (bool, Collision) {
+	res := collision2d.NewResponse()
+	res = res.NotColliding()
+	c := collision2d.NewCircle(dotA.ToCollision2d(), 1)
+	col := collision2d.PointInCircle(dotB.ToCollision2d(), c)
+	if col {
+		res.AInB, res.BInA = true, true
+	}
+	return col, Collision{&res}
 }

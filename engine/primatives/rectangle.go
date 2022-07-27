@@ -4,40 +4,39 @@ import (
 	"github.com/Tarliton/collision2d"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
+	m "github.com/mttchpmn07/cassini/engine/math"
 )
 
+type quad struct {
+	Min m.Vector
+	Max m.Vector
+}
+
 type Rect struct {
-	*pixel.Rect
+	*quad
 	Primative
 }
 
-func NewRectangle(min Vector, max Vector) Rect {
+func NewRectangle(min m.Vector, max m.Vector) Rect {
 	return Rect{
-		&pixel.Rect{
-			Min: min.toPixelVec(),
-			Max: max.toPixelVec(),
+		&quad{
+			Min: min,
+			Max: max,
 		},
 		NewPrimative(NewCollider(NewShape(Rectangle))),
 	}
 }
 
-func FromPixelRect(rect pixel.Rect) Rect {
-	return Rect{
-		&rect,
-		NewPrimative(NewCollider(NewShape(Rectangle))),
-	}
-}
-
-func (r Rect) Move(v Vector) Primative {
-	r.Max = r.Max.Add(v.toPixelVec())
-	r.Min = r.Min.Add(v.toPixelVec())
+func (r Rect) Move(v m.Vector) Primative {
+	r.Max = r.Max.Add(v)
+	r.Min = r.Min.Add(v)
 	return r
 }
 
 func (r Rect) toCollision2d() collision2d.Polygon {
-	mid := FromPixelVec(r.Max).Mid(FromPixelVec(r.Min))
-	diff := FromPixelVec(r.Max).Diff(FromPixelVec(r.Min))
-	newPoly := collision2d.NewBox(mid.toCollision2d(), diff.X, diff.Y).ToPolygon()
+	mid := r.Max.Mid(r.Min)
+	diff := r.Max.Diff(r.Min)
+	newPoly := collision2d.NewBox(mid.ToCollision2d(), diff.X, diff.Y).ToPolygon()
 	return newPoly.SetOffset(collision2d.NewVector(-diff.X/2, -diff.Y/2))
 }
 
@@ -48,7 +47,7 @@ func (r Rect) Collides(other Collider) (Collision, bool) {
 	col := false
 	switch other.Type() {
 	case Point:
-		v := other.(Vector).toCollision2d()
+		v := other.(Dot).Vector.ToCollision2d()
 		col = collision2d.PointInPolygon(v, rec)
 	case Line:
 		l := other.(Lin)
@@ -70,9 +69,9 @@ func (r Rect) Collides(other Collider) (Collision, bool) {
 func (r Rect) Raster() *imdraw.IMDraw {
 	imd := imdraw.New(nil)
 	imd.Color = r.C()
-	imd.Push(r.Min)
+	imd.Push(r.Min.ToPixel())
 	imd.Push(pixel.V(r.Min.X, r.Max.Y))
-	imd.Push(r.Max)
+	imd.Push(r.Max.ToPixel())
 	imd.Push(pixel.V(r.Max.X, r.Min.Y))
 	imd.Polygon(r.T())
 	return imd

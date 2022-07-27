@@ -3,10 +3,11 @@ package primatives
 import (
 	"github.com/Tarliton/collision2d"
 	"github.com/faiface/pixel/imdraw"
+	m "github.com/mttchpmn07/cassini/engine/math"
 )
 
 type poly struct {
-	Points []Vector
+	Points []m.Vector
 }
 
 type Poly struct {
@@ -14,8 +15,8 @@ type Poly struct {
 	Primative
 }
 
-func NewPolygon(points ...Vector) Poly {
-	var vectors []Vector
+func NewPolygon(points ...m.Vector) Poly {
+	var vectors []m.Vector
 	vectors = append(vectors, points...)
 	return Poly{
 		&poly{
@@ -26,7 +27,7 @@ func NewPolygon(points ...Vector) Poly {
 }
 
 func NewPolygonFromLines(lines []line) Poly {
-	var vectors []Vector
+	var vectors []m.Vector
 	for _, l := range lines {
 		vectors = append(vectors, l.Start)
 	}
@@ -38,8 +39,8 @@ func NewPolygonFromLines(lines []line) Poly {
 	}
 }
 
-func (p Poly) Move(v Vector) Primative {
-	newPoints := []Vector{}
+func (p Poly) Move(v m.Vector) Primative {
+	newPoints := []m.Vector{}
 	for i := range p.Points {
 		newPoints = append(newPoints, p.Points[i].Add(v))
 	}
@@ -47,8 +48,8 @@ func (p Poly) Move(v Vector) Primative {
 	return p
 }
 
-func (p Poly) Center() Vector {
-	center := ZeroVector()
+func (p Poly) Center() m.Vector {
+	center := m.ZeroVector()
 	for _, point := range p.Points {
 		center = center.Add(point)
 	}
@@ -61,9 +62,10 @@ func (p Poly) toCollision2d() collision2d.Polygon {
 		corners = append(corners, point.X)
 		corners = append(corners, point.Y)
 	}
+	center := p.Center()
 	return collision2d.NewPolygon(
-		p.Center().toCollision2d(),
-		p.Center().toCollision2d().Scale(-1),
+		center.ToCollision2d(),
+		center.ToCollision2d().Scale(-1),
 		0,
 		corners,
 	)
@@ -76,7 +78,7 @@ func (p Poly) Collides(other Collider) (Collision, bool) {
 	col := false
 	switch other.Type() {
 	case Point:
-		v := other.(Vector).toCollision2d()
+		v := other.(Dot).Vector.ToCollision2d()
 		col = collision2d.PointInPolygon(v, pol)
 	case Line:
 		l := other.(Lin)
@@ -99,7 +101,7 @@ func (p Poly) Raster() *imdraw.IMDraw {
 	imd := imdraw.New(nil)
 	imd.Color = p.C()
 	for _, p := range p.Points {
-		imd.Push(p.toPixelVec())
+		imd.Push(p.ToPixel())
 	}
 	imd.Polygon(p.T())
 	return imd

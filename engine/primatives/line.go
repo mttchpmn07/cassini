@@ -5,11 +5,12 @@ import (
 
 	"github.com/Tarliton/collision2d"
 	"github.com/faiface/pixel/imdraw"
+	m "github.com/mttchpmn07/cassini/engine/math"
 )
 
 type line struct {
-	Start Vector
-	End   Vector
+	Start m.Vector
+	End   m.Vector
 }
 
 type Lin struct {
@@ -17,7 +18,7 @@ type Lin struct {
 	Primative
 }
 
-func NewLine(start Vector, end Vector) Lin {
+func NewLine(start m.Vector, end m.Vector) Lin {
 	return Lin{
 		&line{
 			Start: start,
@@ -28,10 +29,10 @@ func NewLine(start Vector, end Vector) Lin {
 }
 
 func fromCollision2dEdges(edge1, edge2 collision2d.Vector) Lin {
-	return NewLine(fromCollision2dVec(edge1), fromCollision2dVec(edge2))
+	return NewLine(m.VectorFromCollision2d(edge1), m.VectorFromCollision2d(edge2))
 }
 
-func (l Lin) Move(v Vector) Primative {
+func (l Lin) Move(v m.Vector) Primative {
 	l.Start = l.Start.Add(v)
 	l.End = l.End.Add(v)
 	return l
@@ -47,7 +48,7 @@ func (l Lin) Collides(other Collider) (Collision, bool) {
 	col := false
 	switch other.Type() {
 	case Point:
-		v := other.(Vector).toCollision2d()
+		v := other.(Dot).Vector.ToCollision2d()
 		c := collision2d.NewCircle(v, 1)
 		col = TestCircleLine(c, l)
 	case Line:
@@ -70,8 +71,8 @@ func (l Lin) Collides(other Collider) (Collision, bool) {
 func (l Lin) Raster() *imdraw.IMDraw {
 	imd := imdraw.New(nil)
 	imd.Color = l.C()
-	imd.Push(l.Start.toPixelVec())
-	imd.Push(l.End.toPixelVec())
+	imd.Push(l.Start.ToPixel())
+	imd.Push(l.End.ToPixel())
 	imd.Line(l.T())
 	return imd
 }

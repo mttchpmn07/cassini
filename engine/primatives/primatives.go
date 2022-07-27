@@ -2,15 +2,16 @@ package primatives
 
 import (
 	"github.com/mttchpmn07/cassini/engine/graphics"
+	m "github.com/mttchpmn07/cassini/engine/math"
 )
 
 type Primative interface {
 	Collider
 	graphics.Rasterable
-	Move(v Vector) Primative
+	Move(v m.Vector) Primative
 }
 
-func (cp concretePrimative) Move(v Vector) Primative {
+func (cp concretePrimative) Move(v m.Vector) Primative {
 	return cp
 }
 
