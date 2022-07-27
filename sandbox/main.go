@@ -140,7 +140,7 @@ func (l *testLayer) OnEvent(event events.Event) {
 		}
 	case "KEY_SPACE_JustPressed":
 		l.shapeSelector += 1
-		if l.shapeSelector > 5 {
+		if l.shapeSelector > 4 {
 			l.shapeSelector = 0
 		}
 	default:
