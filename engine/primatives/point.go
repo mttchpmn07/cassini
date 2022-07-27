@@ -31,31 +31,26 @@ func (d Dot) Move(v m.Vector) Primative {
 	return d
 }
 
-func (d Dot) Collides(other Collider) (Collision, bool) {
-	v := d.Vector.ToCollision2d()
-	res := collision2d.NewResponse()
-	res = res.NotColliding()
-	col := false
+func (d Dot) Collides(other Collider) (bool, Collision) {
 	switch other.Type() {
 	case Point:
-		p := other.(Dot).Vector.ToCollision2d()
-		c := collision2d.NewCircle(p, 1)
-		col = collision2d.PointInCircle(v, c)
+		return TestDotDot(other.(Dot), d)
 	case Line:
-		l := other.(Lin)
-		c := collision2d.NewCircle(v, 1)
-		col = TestCircleLine(c, l)
+		col, res := TestDotLine(d, other.(Lin))
+		return col, res.Reverse()
 	case Circle:
-		c := other.(Circ).toCollision2d()
-		col = collision2d.PointInCircle(v, c)
+		col, res := TestDotCircle(d, other.(Circ))
+		return col, res.Reverse()
 	case Rectangle:
-		r := other.(Rect).toCollision2d()
-		col = collision2d.PointInPolygon(v, r)
+		col, res := TestDotRect(d, other.(Rect))
+		return col, res.Reverse()
 	case Polygon:
-		p := other.(Poly).toCollision2d()
-		col = collision2d.PointInPolygon(v, p)
+		col, res := TestDotPolygon(d, other.(Poly))
+		return col, res.Reverse()
 	}
-	return Collision{&res}, col
+	res := collision2d.NewResponse()
+	res = res.NotColliding()
+	return false, Collision{&res}
 }
 
 func (d Dot) Raster() *imdraw.IMDraw {

@@ -41,29 +41,25 @@ func (c Circ) toCollision2d() collision2d.Circle {
 	return collision2d.NewCircle(c.Center.ToCollision2d(), c.Radius)
 }
 
-func (c Circ) Collides(other Collider) (Collision, bool) {
-	cir := c.toCollision2d()
-	res := collision2d.NewResponse()
-	res = res.NotColliding()
-	col := false
+func (c Circ) Collides(other Collider) (bool, Collision) {
 	switch other.Type() {
 	case Point:
-		v := other.(Dot).Vector.ToCollision2d()
-		col = collision2d.PointInCircle(v, cir)
+		return TestDotCircle(other.(Dot), c)
 	case Line:
-		col = TestCircleLine(cir, other.(Lin))
+		col, res := TestCircleLine(c, other.(Lin))
+		return col, res.Reverse()
 	case Circle:
-		otherC := other.(Circ).toCollision2d()
-		col, res = collision2d.TestCircleCircle(cir, otherC)
+		return TestCircleCircle(other.(Circ), c)
 	case Rectangle:
-		rec := other.(Rect).toCollision2d()
-		col, res = TestCirclePolygon(cir, rec)
+		col, res := TestCircleRect(c, other.(Rect))
+		return col, res.Reverse()
 	case Polygon:
-		p := other.(Poly).toCollision2d()
-		col, res = TestCirclePolygon(cir, p)
-	default:
+		col, res := TestCirclePolygon(c, other.(Poly))
+		return col, res.Reverse()
 	}
-	return Collision{&res}, col
+	res := collision2d.NewResponse()
+	res = res.NotColliding()
+	return false, Collision{&res}
 }
 
 func (c Circ) Raster() *imdraw.IMDraw {

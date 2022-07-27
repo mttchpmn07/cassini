@@ -40,30 +40,34 @@ func (r Rect) toCollision2d() collision2d.Polygon {
 	return newPoly.SetOffset(collision2d.NewVector(-diff.X/2, -diff.Y/2))
 }
 
-func (r Rect) Collides(other Collider) (Collision, bool) {
-	rec := r.toCollision2d()
-	res := collision2d.NewResponse()
-	res = res.NotColliding()
-	col := false
+func (r Rect) ToPolygon() Poly {
+	points := []m.Vector{
+		r.Min,
+		m.NewVector(r.Min.X, r.Max.Y),
+		r.Max,
+		m.NewVector(r.Max.X, r.Min.Y),
+	}
+	return NewPolygon(points...)
+}
+
+func (r Rect) Collides(other Collider) (bool, Collision) {
 	switch other.Type() {
 	case Point:
-		v := other.(Dot).Vector.ToCollision2d()
-		col = collision2d.PointInPolygon(v, rec)
+		return TestDotRect(other.(Dot), r)
 	case Line:
-		l := other.(Lin)
-		col, res = TestPolygonLine(rec, l)
+		col, res := TestRectLine(r, other.(Lin))
+		return col, res.Reverse()
 	case Circle:
-		c := other.(Circ).toCollision2d()
-		col, res = collision2d.TestCirclePolygon(c, rec)
+		return TestCircleRect(other.(Circ), r)
 	case Rectangle:
-		otherR := other.(Rect).toCollision2d()
-		col, res = collision2d.TestPolygonPolygon(rec, otherR)
+		return TestRectRect(other.(Rect), r)
 	case Polygon:
-		p := other.(Poly).toCollision2d()
-		col, res = collision2d.TestPolygonPolygon(rec, p)
-	default:
+		col, res := TestRectPolygon(r, other.(Poly))
+		return col, res.Reverse()
 	}
-	return Collision{&res}, col
+	res := collision2d.NewResponse()
+	res = res.NotColliding()
+	return false, Collision{&res}
 }
 
 func (r Rect) Raster() *imdraw.IMDraw {

@@ -42,30 +42,23 @@ func (l Lin) String() string {
 	return fmt.Sprintf("(%v, %v) <-> (%v, %v)", l.Start.X, l.Start.Y, l.End.X, l.End.Y)
 }
 
-func (l Lin) Collides(other Collider) (Collision, bool) {
-	res := collision2d.NewResponse()
-	res = res.NotColliding()
-	col := false
+func (l Lin) Collides(other Collider) (bool, Collision) {
 	switch other.Type() {
 	case Point:
-		v := other.(Dot).Vector.ToCollision2d()
-		c := collision2d.NewCircle(v, 1)
-		col = TestCircleLine(c, l)
+		return TestDotLine(other.(Dot), l)
 	case Line:
-		l2 := other.(Lin)
-		col = TestLineLine(l, l2)
+		return TestLineLine(other.(Lin), l)
 	case Circle:
-		c := other.(Circ).toCollision2d()
-		col = TestCircleLine(c, l)
+		return TestCircleLine(other.(Circ), l)
 	case Rectangle:
-		r := other.(Rect).toCollision2d()
-		col, res = TestPolygonLine(r, l)
+		return TestRectLine(other.(Rect), l)
 	case Polygon:
-		p := other.(Poly).toCollision2d()
-		col, res = TestPolygonLine(p, l)
+		return TestPolygonLine(other.(Poly), l)
 	default:
 	}
-	return Collision{&res}, col
+	res := collision2d.NewResponse()
+	res = res.NotColliding()
+	return false, Collision{&res}
 }
 
 func (l Lin) Raster() *imdraw.IMDraw {

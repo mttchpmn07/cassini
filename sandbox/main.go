@@ -103,7 +103,7 @@ func (l *testLayer) OnEvent(event events.Event) {
 		}
 		l.App.Ren.SetColor(colornames.White)
 		for _, s := range l.Shapes {
-			if _, col := p.Collides(l.MousePoly, s); col {
+			if col, _ := p.Collides(l.MousePoly, s); col {
 				newShape := MouseShape(mousePos, l.shapeSelector)
 				newShape.Color(colornames.Red)
 				l.NoCollideShapes = append(l.NoCollideShapes, newShape)
