@@ -6,27 +6,24 @@ import (
 	"github.com/Tarliton/collision2d"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
-	"github.com/mttchpmn07/cassini/engine"
 )
 
 type Circ struct {
 	*pixel.Circle
-	engine.Shape
-	engine.Rasterable
+	Primative
 }
 
-func NewCircle(radius float64, location Vector) Circ {
+func NewCircle(radius float64, location Vector) Primative {
 	return Circ{
 		&pixel.Circle{
 			Radius: radius,
 			Center: location.toPixelVec(),
 		},
-		engine.NewShape(engine.Circle),
-		engine.NewRasterable(),
+		NewPrimative(NewCollider(NewShape(Circle))),
 	}
 }
 
-func (c Circ) Move(v Vector) Collider {
+func (c Circ) Move(v Vector) Primative {
 	c.Center = c.Center.Add(v.toPixelVec())
 	return c
 }
@@ -45,18 +42,18 @@ func (c Circ) Collides(other Collider) (Collision, bool) {
 	res = res.NotColliding()
 	col := false
 	switch other.Type() {
-	case engine.Point:
+	case Point:
 		v := other.(Vector).toCollision2d()
 		col = collision2d.PointInCircle(v, cir)
-	case engine.Line:
+	case Line:
 		col = TestCircleLine(cir, other.(Lin))
-	case engine.Circle:
+	case Circle:
 		otherC := other.(Circ).toCollision2d()
 		col, res = collision2d.TestCircleCircle(cir, otherC)
-	case engine.Rectangle:
+	case Rectangle:
 		rec := other.(Rect).toCollision2d()
 		col, res = TestCirclePolygon(cir, rec)
-	case engine.Polygon:
+	case Polygon:
 		p := other.(Poly).toCollision2d()
 		col, res = TestCirclePolygon(cir, p)
 	default:

@@ -1,10 +1,12 @@
-package engine
+package graphics
 
 import (
 	"math"
 
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/pixelgl"
+
+	"github.com/mttchpmn07/cassini/engine/events"
 )
 
 type Platform struct {
@@ -32,33 +34,33 @@ func NewPlatform(title string, width float64, height float64) (*Platform, error)
 	return &Platform{win}, nil
 }
 
-func (p *Platform) UpdateWindow(dispatcher Publisher) {
+func (p *Platform) UpdateWindow(dispatcher events.Publisher) {
 	p.Update()
 	p.updateKeys(dispatcher)
 
 }
 
-func (p *Platform) updateKeys(dispatcher Publisher) {
+func (p *Platform) updateKeys(dispatcher events.Publisher) {
 	mousePos := pixel.V(math.Inf(1), math.Inf(1))
 	if p.MouseInsideWindow() {
 		mousePos = p.MousePosition()
 		if mousePos != p.MousePreviousPosition() {
-			dispatcher.Broadcast(NewEvent("mouseMove", mousePos))
+			dispatcher.Broadcast(events.NewEvent("mouseMove", mousePos))
 		}
 	}
 	for key, element := range KeyMap {
 		if p.Press(ButtonFromInt(element)) {
-			dispatcher.Broadcast(NewEvent(key+"_Pressed", mousePos))
+			dispatcher.Broadcast(events.NewEvent(key+"_Pressed", mousePos))
 		}
 	}
 	for key, element := range KeyMap {
 		if p.Tap(ButtonFromInt(element)) {
-			dispatcher.Broadcast(NewEvent(key+"_JustPressed", mousePos))
+			dispatcher.Broadcast(events.NewEvent(key+"_JustPressed", mousePos))
 		}
 	}
 	for key, element := range KeyMap {
 		if p.Release(ButtonFromInt(element)) {
-			dispatcher.Broadcast(NewEvent(key+"_JustReleased", mousePos))
+			dispatcher.Broadcast(events.NewEvent(key+"_JustReleased", mousePos))
 		}
 	}
 }

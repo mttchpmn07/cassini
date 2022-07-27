@@ -3,7 +3,6 @@ package primatives
 import (
 	"github.com/Tarliton/collision2d"
 	"github.com/faiface/pixel/imdraw"
-	"github.com/mttchpmn07/cassini/engine"
 )
 
 type poly struct {
@@ -12,8 +11,7 @@ type poly struct {
 
 type Poly struct {
 	*poly
-	engine.Shape
-	engine.Rasterable
+	Primative
 }
 
 func NewPolygon(points ...Vector) Poly {
@@ -23,8 +21,7 @@ func NewPolygon(points ...Vector) Poly {
 		&poly{
 			Points: vectors,
 		},
-		engine.NewShape(engine.Polygon),
-		engine.NewRasterable(),
+		NewPrimative(NewCollider(NewShape(Polygon))),
 	}
 }
 
@@ -37,12 +34,11 @@ func NewPolygonFromLines(lines []line) Poly {
 		&poly{
 			Points: vectors,
 		},
-		engine.NewShape(engine.Polygon),
-		engine.NewRasterable(),
+		NewPrimative(NewCollider(NewShape(Polygon))),
 	}
 }
 
-func (p Poly) Move(v Vector) Collider {
+func (p Poly) Move(v Vector) Primative {
 	newPoints := []Vector{}
 	for i := range p.Points {
 		newPoints = append(newPoints, p.Points[i].Add(v))
@@ -79,19 +75,19 @@ func (p Poly) Collides(other Collider) (Collision, bool) {
 	res = res.NotColliding()
 	col := false
 	switch other.Type() {
-	case engine.Point:
+	case Point:
 		v := other.(Vector).toCollision2d()
 		col = collision2d.PointInPolygon(v, pol)
-	case engine.Line:
+	case Line:
 		l := other.(Lin)
 		col, res = TestPolygonLine(pol, l)
-	case engine.Circle:
+	case Circle:
 		c := other.(Circ).toCollision2d()
 		col, res = collision2d.TestPolygonCircle(pol, c)
-	case engine.Rectangle:
+	case Rectangle:
 		rec := other.(Rect).toCollision2d()
 		col, res = collision2d.TestPolygonPolygon(pol, rec)
-	case engine.Polygon:
+	case Polygon:
 		otherP := other.(Poly).toCollision2d()
 		col, res = collision2d.TestPolygonPolygon(pol, otherP)
 	default:

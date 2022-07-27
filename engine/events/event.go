@@ -1,6 +1,8 @@
-package engine
+package events
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Event interface {
 	Key() string

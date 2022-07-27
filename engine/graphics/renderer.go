@@ -1,4 +1,4 @@
-package engine
+package graphics
 
 import (
 	"image"
@@ -75,12 +75,11 @@ func NewDrawObject(spritePath string, startLoc pixel.Vec, angle, scale float64) 
 	}, nil
 }
 
-/*
-func (do DrawObject) Moved(loc Vector) *DrawObject {
-	do.Loc = loc
+func (do DrawObject) Moved(x, y float64) *DrawObject {
+	do.Loc = pixel.V(x, y)
 	return &do
 }
-*/
+
 func loadSpriteSheet(path string) (Picture, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -116,6 +115,7 @@ type RenderSystem interface {
 	DrawSprite(do *DrawObject)
 	DrawShape(shape Rasterable)
 	DrawShapes(shapes []Rasterable)
+	Draw(pen Rasterable)
 }
 
 func NewRenderSystem(platform *Platform) RenderSystem {

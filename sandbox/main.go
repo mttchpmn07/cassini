@@ -6,18 +6,21 @@ import (
 
 	"github.com/faiface/pixel"
 	"github.com/mttchpmn07/cassini/engine"
+	"github.com/mttchpmn07/cassini/engine/events"
+	"github.com/mttchpmn07/cassini/engine/graphics"
+	"github.com/mttchpmn07/cassini/engine/primatives"
 	p "github.com/mttchpmn07/cassini/engine/primatives"
 	"golang.org/x/image/colornames"
 )
 
 type testLayer struct {
 	engine.BaseLayer
-	Sprite          *engine.DrawObject
+	Sprite          *graphics.DrawObject
 	Shapes          []p.Primative
 	NoCollideShapes []p.Primative
 	MousePoint      p.Primative
 	MousePoly       p.Primative
-	DragLine        p.Lin
+	DragLine        p.Primative
 	DragLineStarted bool
 	SpriteLocs      []p.Vector
 	shapeSelector   int
@@ -48,7 +51,7 @@ func NewTestLyer() *testLayer {
 	//tl.Shapes = append(tl.Shapes, p.NewRectangle(p.NewVector(400, 400), p.NewVector(500, 500)))
 
 	var err error
-	tl.Sprite, err = engine.NewDrawObject("./celebrate.png", pixel.V(500, 500), 0, 0.5)
+	tl.Sprite, err = graphics.NewDrawObject("./celebrate.png", pixel.V(500, 500), 0, 0.5)
 	if err != nil {
 		panic(err)
 	}
@@ -56,7 +59,7 @@ func NewTestLyer() *testLayer {
 	return tl
 }
 
-func MouseShape(mousePos p.Vector, shapeSelector int) engine.Shape {
+func MouseShape(mousePos p.Vector, shapeSelector int) p.Primative {
 	switch shapeSelector {
 	case 0:
 		return p.NewVector(mousePos.X, mousePos.Y)
@@ -75,30 +78,35 @@ func (l *testLayer) OnDetach() {}
 func (l *testLayer) OnUpdate() {
 	l.App.Ren.OpenBatch(l.Sprite.Spritesheet)
 	for _, loc := range l.SpriteLocs {
-		l.App.Ren.DrawSprite(l.Sprite.Moved(loc))
+		l.App.Ren.DrawSprite(l.Sprite.Moved(loc.X, loc.Y))
 	}
-	l.App.Ren.DrawShapes(l.Shapes)
-	l.App.Ren.DrawShapes(l.NoCollideShapes)
+	for _, s := range l.Shapes {
+		l.App.Ren.Draw(s)
+	}
+	for _, s := range l.NoCollideShapes {
+		l.App.Ren.Draw(s)
+	}
 	l.App.Ren.DrawShape(l.MousePoint)
 	l.App.Ren.DrawShape(l.DragLine)
 	l.App.Ren.DrawShape(l.MousePoly)
 	l.App.Ren.CloseBatch()
 }
 
-func (l *testLayer) OnEvent(event engine.Event) {
-	mousePos := p.VectorFromEvent(event)
-	mousePoint := engine.Shape(mousePos)
+func (l *testLayer) OnEvent(event events.Event) {
+	mousePos := primatives.FromPixelVec(event.Contents().(pixel.Vec))
+	mousePoint := p.Primative(mousePos)
 	switch event.Key() {
 	case "mouseMove":
 		l.MousePoly = MouseShape(mousePos, l.shapeSelector)
 		l.MousePoint = mousePoint
 		if l.DragLineStarted {
-			l.DragLine.End = mousePos
+			l.DragLine.(p.Lin).End = mousePos
 		}
 		l.App.Ren.SetColor(colornames.White)
 		for _, s := range l.Shapes {
 			//if _, col := p.Collides(mousePoint, s); col {
 			if _, col := p.Collides(l.MousePoly, s); col {
+				//engine.Log("Collision")
 				l.App.Ren.SetColor(colornames.Red)
 				l.NoCollideShapes = append(l.NoCollideShapes, MouseShape(mousePos, l.shapeSelector))
 				//l.NoCollideShapes = append(l.NoCollideShapes, p.NewVector(mousePos.X, mousePos.Y))
@@ -110,12 +118,12 @@ func (l *testLayer) OnEvent(event engine.Event) {
 	case "MOUSE_BUTTON_RIGHT_JustPressed":
 		engine.Log(fmt.Sprintf("%v", mousePos))
 		if l.DragLineStarted {
-			l.DragLine.End = mousePos
+			l.DragLine.(p.Lin).End = mousePos
 			l.DragLineStarted = false
 		} else {
-			l.Shapes = append(l.Shapes, p.NewLine(l.DragLine.Start, l.DragLine.End))
-			l.DragLine.Start = mousePos
-			l.DragLine.End = mousePos
+			l.Shapes = append(l.Shapes, p.NewLine(l.DragLine.(p.Lin).Start, l.DragLine.(p.Lin).End))
+			l.DragLine.(p.Lin).Start = mousePos
+			l.DragLine.(p.Lin).End = mousePos
 			l.DragLineStarted = true
 		}
 	case "KEY_RIGHT_Pressed":
@@ -142,6 +150,7 @@ func (l *testLayer) OnEvent(event engine.Event) {
 	default:
 	}
 }
+
 func main() {
 	config := engine.AppConfig{
 		Title:  "Test App",
@@ -149,7 +158,7 @@ func main() {
 		Height: 796,
 	}
 	app := engine.InitApp(config)
-	app.PushOverlay(engine.NewDemoLayer("DemoLayer"))
+	//app.PushOverlay(engine.NewDemoLayer("DemoLayer"))
 
 	app.PushLayer(NewTestLyer())
 

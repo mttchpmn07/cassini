@@ -5,7 +5,6 @@ import (
 
 	"github.com/Tarliton/collision2d"
 	"github.com/faiface/pixel/imdraw"
-	"github.com/mttchpmn07/cassini/engine"
 )
 
 type line struct {
@@ -15,8 +14,7 @@ type line struct {
 
 type Lin struct {
 	*line
-	engine.Shape
-	engine.Rasterable
+	Primative
 }
 
 func NewLine(start Vector, end Vector) Lin {
@@ -25,8 +23,7 @@ func NewLine(start Vector, end Vector) Lin {
 			Start: start,
 			End:   end,
 		},
-		engine.NewShape(engine.Line),
-		engine.NewRasterable(),
+		NewPrimative(NewCollider(NewShape(Line))),
 	}
 }
 
@@ -34,7 +31,7 @@ func fromCollision2dEdges(edge1, edge2 collision2d.Vector) Lin {
 	return NewLine(fromCollision2dVec(edge1), fromCollision2dVec(edge2))
 }
 
-func (l Lin) Move(v Vector) Collider {
+func (l Lin) Move(v Vector) Primative {
 	l.Start = l.Start.Add(v)
 	l.End = l.End.Add(v)
 	return l
@@ -49,20 +46,20 @@ func (l Lin) Collides(other Collider) (Collision, bool) {
 	res = res.NotColliding()
 	col := false
 	switch other.Type() {
-	case engine.Point:
+	case Point:
 		v := other.(Vector).toCollision2d()
 		c := collision2d.NewCircle(v, 1)
 		col = TestCircleLine(c, l)
-	case engine.Line:
+	case Line:
 		l2 := other.(Lin)
 		col = TestLineLine(l, l2)
-	case engine.Circle:
+	case Circle:
 		c := other.(Circ).toCollision2d()
 		col = TestCircleLine(c, l)
-	case engine.Rectangle:
+	case Rectangle:
 		r := other.(Rect).toCollision2d()
 		col, res = TestPolygonLine(r, l)
-	case engine.Polygon:
+	case Polygon:
 		p := other.(Poly).toCollision2d()
 		col, res = TestPolygonLine(p, l)
 	default:

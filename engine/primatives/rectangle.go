@@ -4,13 +4,11 @@ import (
 	"github.com/Tarliton/collision2d"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
-	"github.com/mttchpmn07/cassini/engine"
 )
 
 type Rect struct {
 	*pixel.Rect
-	engine.Shape
-	engine.Rasterable
+	Primative
 }
 
 func NewRectangle(min Vector, max Vector) Rect {
@@ -19,28 +17,26 @@ func NewRectangle(min Vector, max Vector) Rect {
 			Min: min.toPixelVec(),
 			Max: max.toPixelVec(),
 		},
-		engine.NewShape(engine.Rectangle),
-		engine.NewRasterable(),
+		NewPrimative(NewCollider(NewShape(Rectangle))),
 	}
 }
 
 func FromPixelRect(rect pixel.Rect) Rect {
 	return Rect{
 		&rect,
-		engine.NewShape(engine.Rectangle),
-		engine.NewRasterable(),
+		NewPrimative(NewCollider(NewShape(Rectangle))),
 	}
 }
 
-func (r Rect) Move(v Vector) Collider {
+func (r Rect) Move(v Vector) Primative {
 	r.Max = r.Max.Add(v.toPixelVec())
 	r.Min = r.Min.Add(v.toPixelVec())
 	return r
 }
 
 func (r Rect) toCollision2d() collision2d.Polygon {
-	mid := fromPixelVec(r.Max).Mid(fromPixelVec(r.Min))
-	diff := fromPixelVec(r.Max).Diff(fromPixelVec(r.Min))
+	mid := FromPixelVec(r.Max).Mid(FromPixelVec(r.Min))
+	diff := FromPixelVec(r.Max).Diff(FromPixelVec(r.Min))
 	newPoly := collision2d.NewBox(mid.toCollision2d(), diff.X, diff.Y).ToPolygon()
 	return newPoly.SetOffset(collision2d.NewVector(-diff.X/2, -diff.Y/2))
 }
@@ -51,19 +47,19 @@ func (r Rect) Collides(other Collider) (Collision, bool) {
 	res = res.NotColliding()
 	col := false
 	switch other.Type() {
-	case engine.Point:
+	case Point:
 		v := other.(Vector).toCollision2d()
 		col = collision2d.PointInPolygon(v, rec)
-	case engine.Line:
+	case Line:
 		l := other.(Lin)
 		col, res = TestPolygonLine(rec, l)
-	case engine.Circle:
+	case Circle:
 		c := other.(Circ).toCollision2d()
 		col, res = collision2d.TestCirclePolygon(c, rec)
-	case engine.Rectangle:
+	case Rectangle:
 		otherR := other.(Rect).toCollision2d()
 		col, res = collision2d.TestPolygonPolygon(rec, otherR)
-	case engine.Polygon:
+	case Polygon:
 		p := other.(Poly).toCollision2d()
 		col, res = collision2d.TestPolygonPolygon(rec, p)
 	default:

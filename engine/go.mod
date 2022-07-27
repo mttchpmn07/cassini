@@ -2,6 +2,8 @@ module github.com/mttchpmn07/cassini/engine
 
 go 1.18
 
+replace github.com/mttchpmn07/cassini/engine/event => ./event
+
 require (
 	github.com/Tarliton/collision2d v0.1.0
 	github.com/faiface/pixel v0.10.0

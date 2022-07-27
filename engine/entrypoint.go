@@ -1,6 +1,10 @@
 package engine
 
-import "github.com/faiface/pixel/pixelgl"
+import (
+	"github.com/faiface/pixel/pixelgl"
+	"github.com/mttchpmn07/cassini/engine/events"
+	"github.com/mttchpmn07/cassini/engine/graphics"
+)
 
 var GlobalApplication Application
 
@@ -18,7 +22,7 @@ func Run() {
 }
 
 func run() {
-	platform, err := NewPlatform(
+	platform, err := graphics.NewPlatform(
 		GlobalApplication.GetConfig().Title,
 		GlobalApplication.GetConfig().Width,
 		GlobalApplication.GetConfig().Height,
@@ -26,8 +30,8 @@ func run() {
 	if err != nil {
 		panic(err)
 	}
-	renderer := NewRenderSystem(platform)
-	dispatcher := NewPublisher()
+	renderer := graphics.NewRenderSystem(platform)
+	dispatcher := events.NewPublisher()
 	dispatcher.Listen(GlobalApplication)
 	GlobalApplication.Run(platform, renderer, dispatcher)
 }

@@ -2,13 +2,27 @@ package primatives
 
 import (
 	"github.com/Tarliton/collision2d"
-	"github.com/mttchpmn07/cassini/engine"
 )
 
 type Collider interface {
-	engine.Shape
-	Move(v Vector) Collider
+	Shape
 	Collides(other Collider) (Collision, bool)
+}
+
+type concreteCollider struct {
+	Shape
+}
+
+func NewCollider(shape Shape) Collider {
+	return &concreteCollider{
+		shape,
+	}
+}
+
+func (cc *concreteCollider) Collides(s Collider) (Collision, bool) {
+	res := collision2d.NewResponse()
+	res = res.NotColliding()
+	return Collision{&res}, false
 }
 
 type Collision struct {

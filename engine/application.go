@@ -1,10 +1,14 @@
 package engine
 
-import "golang.org/x/image/colornames"
+import (
+	"github.com/mttchpmn07/cassini/engine/events"
+	"github.com/mttchpmn07/cassini/engine/graphics"
+	"golang.org/x/image/colornames"
+)
 
 type Application interface {
-	Run(platform *Platform, renderer RenderSystem, dispatcher Publisher)
-	OnEvent(event Event)
+	Run(platform *graphics.Platform, renderer graphics.RenderSystem, dispatcher events.Publisher)
+	OnEvent(event events.Event)
 	PushLayer(layer Layer)
 	PushOverlay(overlay Layer)
 	GetConfig() AppConfig
@@ -19,9 +23,9 @@ type CassiniApp struct {
 	Log    LogLevel
 	Layers LayerStack
 	Config AppConfig
-	Plat   *Platform
-	Ren    RenderSystem
-	Dis    Publisher
+	Plat   *graphics.Platform
+	Ren    graphics.RenderSystem
+	Dis    events.Publisher
 }
 
 func NewCassiniApp(config AppConfig) Application {
@@ -41,7 +45,7 @@ func (c *CassiniApp) GetConfig() AppConfig {
 	return c.Config
 }
 
-func (c *CassiniApp) Run(platform *Platform, renderer RenderSystem, dispatcher Publisher) {
+func (c *CassiniApp) Run(platform *graphics.Platform, renderer graphics.RenderSystem, dispatcher events.Publisher) {
 	if c.Log == Trace {
 		LogTrace("Enter: func (c CassiniApp) Run()")
 	}
@@ -64,7 +68,7 @@ func (c *CassiniApp) Run(platform *Platform, renderer RenderSystem, dispatcher P
 	}
 }
 
-func (c *CassiniApp) OnEvent(event Event) {
+func (c *CassiniApp) OnEvent(event events.Event) {
 	if c.Log == Trace {
 		LogTrace("Enter: func (c cassiniApp) OnEvent(event Event)")
 	}

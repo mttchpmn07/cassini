@@ -1,5 +1,7 @@
 package engine
 
+import "github.com/mttchpmn07/cassini/engine/events"
+
 type BaseLayer struct {
 	Name string
 	App  *CassiniApp
@@ -13,7 +15,7 @@ type Layer interface {
 	OnAttach()
 	OnDetach()
 	OnUpdate()
-	OnEvent(event Event)
+	OnEvent(event events.Event)
 	SetApp(app *CassiniApp)
 }
 
@@ -32,7 +34,7 @@ func NewDemoLayer(name string) Layer {
 func (l *DemoLayer) OnAttach() {}
 func (l *DemoLayer) OnDetach() {}
 func (l *DemoLayer) OnUpdate() {}
-func (l *DemoLayer) OnEvent(event Event) {
+func (l *DemoLayer) OnEvent(event events.Event) {
 	Log(event.Key())
 }
 

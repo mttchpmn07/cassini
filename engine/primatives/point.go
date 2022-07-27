@@ -7,20 +7,19 @@ import (
 	"github.com/Tarliton/collision2d"
 	"github.com/faiface/pixel"
 	"github.com/faiface/pixel/imdraw"
-	"github.com/mttchpmn07/cassini/engine"
+	"github.com/mttchpmn07/cassini/engine/events"
 )
 
 type Vector struct {
 	*pixel.Vec
-	engine.Shape
-	engine.Rasterable
+	Primative
 }
 
-func PointFromEvent(event engine.Event) Vector {
+func PointFromEvent(event events.Event) Vector {
 	return event.Contents().(Vector)
 }
 
-func VectorFromEvent(event engine.Event) Vector {
+func VectorFromEvent(event events.Event) Vector {
 	return event.Contents().(Vector)
 }
 
@@ -28,16 +27,14 @@ func NewVector(X, Y float64) Vector {
 	v := pixel.V(X, Y)
 	return Vector{
 		&v,
-		engine.NewShape(engine.Point),
-		engine.NewRasterable(),
+		NewPrimative(NewCollider(NewShape(Point))),
 	}
 }
 
-func fromPixelVec(v pixel.Vec) Vector {
+func FromPixelVec(v pixel.Vec) Vector {
 	return Vector{
 		&v,
-		engine.NewShape(engine.Point),
-		engine.NewRasterable(),
+		NewPrimative(NewCollider(NewShape(Point))),
 	}
 }
 
@@ -78,7 +75,7 @@ func (vec Vector) Dist(other Vector) float64 {
 	return math.Sqrt(diff.X*diff.X + diff.Y*diff.Y)
 }
 
-func (vec Vector) Move(v Vector) Collider {
+func (vec Vector) Move(v Vector) Primative {
 	vec.X = v.X
 	vec.Y = v.Y
 	return vec
@@ -94,21 +91,21 @@ func (vec Vector) Collides(other Collider) (Collision, bool) {
 	res = res.NotColliding()
 	col := false
 	switch other.Type() {
-	case engine.Point:
+	case Point:
 		p := other.(Vector)
 		c := collision2d.NewCircle(p.toCollision2d(), 1)
 		col = collision2d.PointInCircle(v, c)
-	case engine.Line:
+	case Line:
 		l := other.(Lin)
 		c := collision2d.NewCircle(v, 1)
 		col = TestCircleLine(c, l)
-	case engine.Circle:
+	case Circle:
 		c := other.(Circ).toCollision2d()
 		col = collision2d.PointInCircle(v, c)
-	case engine.Rectangle:
+	case Rectangle:
 		r := other.(Rect).toCollision2d()
 		col = collision2d.PointInPolygon(v, r)
-	case engine.Polygon:
+	case Polygon:
 		p := other.(Poly).toCollision2d()
 		col = collision2d.PointInPolygon(v, p)
 	}
