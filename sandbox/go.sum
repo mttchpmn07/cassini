@@ -1,5 +1,7 @@
 github.com/Tarliton/collision2d v0.1.0 h1:tEz0dWU2xd5cHGe+g1P849V6hxbcky3idD9DuBagPmA=
 github.com/Tarliton/collision2d v0.1.0/go.mod h1:EKlp3GEwce/QEDPigRpMDIrMQbKZryukthYoOhLIaaM=
+github.com/TrueFurby/goexplorer v0.0.1 h1:6obYTQL6PT6vQhNdyB5/zvq6E/LuINi+F1JEJmi6n24=
+github.com/TrueFurby/goexplorer v0.0.1/go.mod h1:x/gP5lrphOn4eij2KF4yTu0p+mkDZBNCc58uQdOvISE=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/faiface/glhf v0.0.0-20181018222622-82a6317ac380 h1:FvZ0mIGh6b3kOITxUnxS3tLZMh7yEoHo75v3/AgUqg0=

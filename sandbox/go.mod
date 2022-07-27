@@ -18,6 +18,7 @@ require (
 
 require (
 	github.com/Tarliton/collision2d v0.1.0 // indirect
+	github.com/TrueFurby/goexplorer v0.0.1 // indirect
 	github.com/faiface/glhf v0.0.0-20181018222622-82a6317ac380 // indirect
 	github.com/faiface/mainthread v0.0.0-20171120011319-8b78f0a41ae3 // indirect
 	github.com/fatih/color v1.13.0 // indirect
