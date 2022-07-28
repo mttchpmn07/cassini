@@ -12,6 +12,7 @@ type Application interface {
 	PushLayer(layer Layer)
 	PushOverlay(overlay Layer)
 	GetConfig() AppConfig
+	Broadcast(event events.Event)
 }
 
 type AppConfig struct {
@@ -96,4 +97,8 @@ func (c *CassiniApp) PushOverlay(overlay Layer) {
 	overlay.SetApp(c)
 	overlay.OnAttach()
 	c.Layers.PushOverlay(overlay)
+}
+
+func (c *CassiniApp) Broadcast(event events.Event) {
+	c.Dis.Broadcast(event)
 }

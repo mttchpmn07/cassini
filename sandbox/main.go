@@ -8,6 +8,7 @@ import (
 	"github.com/mttchpmn07/cassini/engine"
 	"github.com/mttchpmn07/cassini/engine/events"
 	"github.com/mttchpmn07/cassini/engine/graphics"
+	"github.com/mttchpmn07/cassini/engine/gui"
 	m "github.com/mttchpmn07/cassini/engine/math"
 	p "github.com/mttchpmn07/cassini/engine/primatives"
 	"golang.org/x/image/colornames"
@@ -92,9 +93,15 @@ func (l *testLayer) OnUpdate() {
 }
 
 func (l *testLayer) OnEvent(event events.Event) {
+	if event.Handled() {
+		return
+	}
 	mousePos := m.VectorFromEvent(event)
 	mousePoint := p.NewDot(mousePos.X, mousePos.Y)
 	switch event.Key() {
+	case "button_click":
+		engine.Log("Button Clicked")
+		event.Handle()
 	case "mouseMove":
 		l.MousePoly = MouseShape(mousePos, l.shapeSelector)
 		l.MousePoint = mousePoint
@@ -109,7 +116,7 @@ func (l *testLayer) OnEvent(event events.Event) {
 				l.NoCollideShapes = append(l.NoCollideShapes, newShape)
 			}
 		}
-	case "MOUSE_BUTTON_LEFT_Pressed":
+	case "MOUSE_BUTTON_LEFT_JustPressed":
 		l.SpriteLocs = append(l.SpriteLocs, mousePos)
 	case "MOUSE_BUTTON_RIGHT_JustPressed":
 		engine.Log(fmt.Sprintf("%v", mousePos))
@@ -147,6 +154,10 @@ func (l *testLayer) OnEvent(event events.Event) {
 	}
 }
 
+func (l *testLayer) Broadcast(event events.Event) {
+	l.App.Broadcast(event)
+}
+
 func main() {
 	config := engine.AppConfig{
 		Title:  "Test App",
@@ -156,6 +167,9 @@ func main() {
 	app := engine.InitApp(config)
 	//app.PushOverlay(engine.NewDemoLayer("DemoLayer"))
 
+	gui := gui.NewGUI("gui")
+
+	app.PushOverlay(gui)
 	app.PushLayer(NewTestLyer())
 
 	engine.Run()

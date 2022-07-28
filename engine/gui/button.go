@@ -1,25 +1,34 @@
 package gui
 
 import (
-	"github.com/faiface/pixel/imdraw"
-	"github.com/mttchpmn07/cassini/engine/primatives"
+	"github.com/faiface/pixel"
+	"github.com/mttchpmn07/cassini/engine"
+	"github.com/mttchpmn07/cassini/engine/events"
+	p "github.com/mttchpmn07/cassini/engine/primatives"
+	"golang.org/x/image/colornames"
 )
 
 type Button struct {
-	Region primatives.Collider
-	Visual []primatives.Collider
+	p.Primative
 }
 
-func NewButton(region primatives.Collider) *Button {
+func NewButton(region p.Primative) Clickable {
 	button := &Button{
-		Region: region,
+		region,
 	}
 	return button
 }
 
-func (b *Button) ClickRegion()   {}
-func (b *Button) ClickCallback() {}
-func (b *Button) Raster() *imdraw.IMDraw {
-	imd := imdraw.New(nil)
-	return imd
+func (b *Button) ClickCallback(d events.Publisher) {
+	engine.Log("Button Clicked (in button)")
+	d.Broadcast(events.NewEvent("button_click", pixel.V(0, 0)))
+	b.Animate()
+}
+
+func (b *Button) Animate() {
+	if b.C() == colornames.White {
+		b.Color(colornames.Blue)
+	} else {
+		b.Color(colornames.White)
+	}
 }
